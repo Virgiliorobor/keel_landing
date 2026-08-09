@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KEEL — The call was made. The record wasn't.</title>
+<meta name="description" content="For years, classification was paperwork. That is no longer the arrangement.">
+<meta property="og:title" content="KEEL — The call was made. The record wasn't.">
+<meta property="og:description" content="For years, classification was paperwork. That is no longer the arrangement.">
+<meta name="twitter:title" content="KEEL — The call was made. The record wasn't.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --pad:clamp(20px,5vw,64px);
+    /* cold state (movements I–III) */
+    --c-paper:#eef0f2;
+    --c-ink:#0e1114;
+    --c-grey:#565e66;
+    --c-faint:rgba(14,17,20,.14);
+    /* warm state (movement IV) */
+    --w-paper:#f8f3ea;
+    --w-ink:#191510;
+    --w-grey:#6d6558;
+    --w-faint:rgba(25,21,16,.14);
+    /* ghost: warm grey at full weight, never faded */
+    --ghost:#8a8274;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--serif);font-size:18px;line-height:1.65;
+    background:var(--c-paper);color:var(--c-ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--c-ink);color:var(--c-paper)}
+  a{color:inherit}
+
+  html[lang="en"] [lang="es"]{display:none !important}
+  html[lang="es"] [lang="en"]{display:none !important}
+
+  .zone{--paper:var(--c-paper);--ink:var(--c-ink);--grey:var(--c-grey);--faint:var(--c-faint);
+    background:var(--paper);color:var(--ink)}
+  .zone.warm{--paper:var(--w-paper);--ink:var(--w-ink);--grey:var(--w-grey);--faint:var(--w-faint)}
+
+  .mono{font-family:var(--mono)}
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--grey);margin-bottom:26px;
+  }
+  /* the governing rule: codes are small, mono, grey, one fixed size, everywhere */
+  .code{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--grey);font-weight:400}
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:50;height:58px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:0 var(--pad);
+    background:color-mix(in srgb,var(--hdr-paper,var(--c-paper)) 90%,transparent);
+    color:var(--hdr-ink,var(--c-ink));
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hdr-faint,var(--c-faint));
+    transition:background .5s ease,color .5s ease;
+  }
+  body.past-hinge header{--hdr-paper:var(--w-paper);--hdr-ink:var(--w-ink);--hdr-faint:var(--w-faint)}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.22em;text-decoration:none}
+  .head-right{display:flex;align-items:center;gap:16px}
+  .lang{display:flex;border:1px solid currentColor;font-family:var(--mono);font-size:11px}
+  .lang button{font-family:inherit;font-size:inherit;letter-spacing:.08em;background:none;border:none;color:inherit;opacity:.55;padding:6px 10px;cursor:pointer}
+  .lang button.on{opacity:1;background:var(--hdr-ink,var(--c-ink));color:var(--hdr-paper,var(--c-paper))}
+  .cta{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid currentColor;padding:9px 16px;text-decoration:none;
+    transition:background .25s ease,color .25s ease;
+  }
+  .cta:hover{background:var(--hdr-ink,var(--c-ink));color:var(--hdr-paper,var(--c-paper))}
+
+  /* ---------- movement nav (four movements, no numbers, no progress) ---------- */
+  .movnav{
+    position:fixed;left:clamp(14px,2.4vw,36px);top:50%;transform:translateY(-50%);z-index:40;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .movnav a{
+    font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    text-decoration:none;color:var(--nav-ink,var(--c-ink));opacity:.3;
+    transition:opacity .3s ease;writing-mode:vertical-rl;
+  }
+  .movnav a.on{opacity:1}
+  body.past-hinge .movnav a{--nav-ink:var(--w-ink)}
+  @media(max-width:1150px){.movnav{display:none}}
+
+  /* ---------- beats ---------- */
+  .beat{padding:clamp(72px,13vh,150px) var(--pad)}
+  .measure{max-width:66ch;margin-left:clamp(0px,14vw,260px)}
+  h1{font-weight:400;letter-spacing:-.015em;line-height:1.04;font-size:clamp(38px,5.8vw,76px);text-wrap:balance;margin-bottom:30px;max-width:18ch}
+  h2{font-weight:400;letter-spacing:-.01em;line-height:1.1;font-size:clamp(28px,3.8vw,50px);text-wrap:balance;margin-bottom:26px;max-width:22ch}
+  p{margin-bottom:18px;max-width:62ch}
+  p:last-child{margin-bottom:0}
+  .coda{
+    font-style:italic;font-size:clamp(20px,2.2vw,27px);line-height:1.4;
+    margin-top:34px;max-width:30ch;color:var(--ink);
+  }
+  .btn{
+    display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);padding:15px 26px;text-decoration:none;
+    border:1px solid var(--ink);transition:background .25s ease,color .25s ease;margin-top:30px;
+  }
+  .btn:hover{background:transparent;color:var(--ink)}
+
+  /* ---------- beat 05: the reconstruction, numbering against the flow ---------- */
+  .steps{list-style:none;margin:30px 0 6px;border-left:1px solid var(--faint)}
+  .steps li{display:flex;gap:22px;padding:20px 0 20px 26px}
+  .steps li+li{border-top:1px solid var(--faint)}
+  .steps .n{font-family:var(--mono);font-size:11px;color:var(--grey);letter-spacing:.08em;min-width:30px;padding-top:6px}
+  .steps p{margin:0}
+
+  /* ---------- hinge ---------- */
+  .hinge{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 var(--pad)}
+  .hinge .measure{max-width:none;margin-left:clamp(0px,10vw,200px)}
+  .hinge h2{font-size:clamp(30px,4.6vw,62px);max-width:24ch;margin-bottom:6px}
+  .hinge h2 em{font-style:italic}
+  .hinge .after{margin-top:40px;max-width:52ch}
+
+  /* ---------- simulator ---------- */
+  .sim{margin-top:56px;border-top:1px solid var(--ink);padding-top:8px;max-width:960px}
+  .sim-controls{
+    display:grid;grid-template-columns:minmax(180px,1fr) minmax(230px,1.3fr) minmax(230px,1.3fr);
+    gap:28px;padding:22px 0 8px;
+  }
+  .sim label,.sim .grouplabel{
+    display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--grey);margin-bottom:10px;
+  }
+  #simValue{
+    font-family:var(--mono);font-size:20px;color:inherit;background:transparent;
+    border:none;border-bottom:1px solid var(--ink);width:100%;padding:6px 2px;
+    font-variant-numeric:tabular-nums;outline:none;border-radius:0;
+  }
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg button{
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+    background:none;border:1px solid var(--faint);color:var(--grey);
+    padding:8px 13px;cursor:pointer;font-variant-numeric:tabular-nums;
+  }
+  .seg button.on{border-color:var(--ink);color:var(--paper);background:var(--ink)}
+  .simnote{
+    font-family:var(--mono);font-size:11px;line-height:1.7;letter-spacing:.02em;
+    color:var(--grey);max-width:44ch;margin-top:14px;
+  }
+  .framing{font-family:var(--mono);font-size:11px;letter-spacing:.02em;color:var(--grey);margin:16px 0 6px}
+
+  /* ghost state: warm grey at full weight; on entry, grey becomes ink. nothing moves. */
+  .sim .fig{transition:color .4s ease}
+  .sim.ghost .fig{color:var(--ghost)}
+  .sim:not(.ghost) .fig{color:var(--ink)}
+  .sim.ghost #simLine .stroke{stroke:var(--ghost)}
+  .sim:not(.ghost) #simLine .stroke{stroke:var(--ink)}
+  .sim.ghost #simLine text{fill:var(--ghost)}
+  .sim:not(.ghost) #simLine text{fill:var(--ink)}
+
+  .ledger{margin-top:34px}
+  .simplot{padding-left:var(--labelw,150px)}
+  #simLine{display:block;width:100%;height:170px}
+  #simLine .stroke{fill:none;stroke-width:1.25}
+  #simLine circle{stroke:none}
+  #simLine text{font-family:var(--mono);font-size:11px}
+  table.ldg{width:100%;border-collapse:collapse;table-layout:fixed}
+  .ldg th,.ldg td{
+    font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.03em;
+    text-align:right;padding:11px 10px;border-top:1px solid var(--faint);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .ldg th:first-child,.ldg td:first-child{
+    text-align:left;width:var(--labelw,150px);color:var(--grey);
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding-left:0;white-space:normal;
+  }
+  .ldg thead th{color:var(--grey);border-top:1px solid var(--ink);font-size:10px;letter-spacing:.12em}
+  .ldg tbody tr:last-child td{border-bottom:1px solid var(--faint)}
+  .ldg td.out{color:var(--faint) !important}
+
+  .landing{margin-top:44px}
+  .landing .toplabel{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey)}
+  /* the exposure figure: the largest object on the site */
+  .bigfig{
+    font-family:var(--serif);font-weight:400;letter-spacing:-.02em;line-height:1;
+    font-size:clamp(56px,9.5vw,150px);font-variant-numeric:tabular-nums;margin-top:8px;
+  }
+  .bigrow{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap}
+  .split{
+    display:grid;grid-template-columns:1fr 1fr;margin-top:36px;max-width:640px;
+    border-top:1px solid var(--ink);
+  }
+  .split>div{padding:16px 18px 4px 0}
+  .split>div+div{border-left:1px solid var(--faint);padding-left:22px}
+  .split .slabel{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
+  .split .sfig{font-family:var(--serif);font-size:clamp(24px,3vw,38px);line-height:1.1;font-variant-numeric:tabular-nums}
+  .splitline{font-family:var(--mono);font-size:11px;color:var(--grey);margin-top:16px;max-width:52ch;letter-spacing:.02em}
+
+  /* ---------- beat 08: five moments + registry inverted ---------- */
+  .moments{margin-top:30px;max-width:62ch}
+  .moments div{padding:16px 0;border-top:1px solid var(--faint)}
+  .moments div:last-child{border-bottom:1px solid var(--faint)}
+  .moments b{font-weight:500}
+  .moments p{margin:0}
+
+  .reg{margin-top:56px;max-width:1020px}
+  table.registry{width:100%;border-collapse:collapse}
+  .registry th{
+    font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--grey);text-align:left;padding:10px 12px 10px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--faint);
+  }
+  .registry td{padding:13px 12px 13px 0;border-bottom:1px solid var(--faint);vertical-align:baseline}
+  .registry td.desc{font-family:var(--serif);font-size:17px;color:var(--ink)}
+  .registry td.jur,.registry td.st,.registry td.dt{font-family:var(--mono);font-size:12px;letter-spacing:.05em;white-space:nowrap}
+  .registry td.st{text-transform:uppercase;font-size:11px;letter-spacing:.09em}
+  /* the code: the smallest, greyest column in the table */
+  .registry th.c-code,.registry td.c-code{text-align:right;padding-right:0}
+  .regnote{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--grey);margin-top:16px}
+
+  /* ---------- close / footer ---------- */
+  .sig{font-style:italic;color:var(--grey);margin-top:20px}
+  footer{
+    padding:22px var(--pad) 30px;display:flex;flex-wrap:wrap;gap:10px 30px;justify-content:space-between;
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--w-paper);color:var(--w-grey);border-top:1px solid var(--w-faint);
+  }
+  footer a{text-decoration:none}
+
+  @media(max-width:860px){
+    body{font-size:17px}
+    .measure{margin-left:0}
+    .hinge .measure{margin-left:0}
+    .sim-controls{grid-template-columns:1fr}
+    :root{--labelw:96px}
+    .ldg th,.ldg td{padding:10px 6px;font-size:11px}
+    .registry th.c-jur,.registry td.jur,.registry th.c-dt,.registry td.dt{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="../">
+    <svg width="14" height="15" viewBox="0 0 18 20" fill="none"><path d="M9 0 L18 20 L0 20 Z" fill="currentColor"/></svg>
+    KEEL
+  </a>
+  <div class="head-right">
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="on">EN</button>
+      <button type="button" data-lang="es">ES</button>
+    </div>
+    <a class="cta" href="#book">
+      <span lang="en">Book a walkthrough</span>
+      <span lang="es">Agenda una demostración</span>
+    </a>
+  </div>
+</header>
+
+<nav class="movnav" aria-label="Movements">
+  <a href="#m1" data-m="m1" class="on"><span lang="en">The repricing</span><span lang="es">La revaluación</span></a>
+  <a href="#m2" data-m="m2"><span lang="en">The arrival</span><span lang="es">La llegada</span></a>
+  <a href="#m3" data-m="m3"><span lang="en">The reconstruction</span><span lang="es">La reconstrucción</span></a>
+  <a href="#m4" data-m="m4"><span lang="en">The position</span><span lang="es">La posición</span></a>
+</nav>
+
+<main>
+
+<!-- ============ MOVEMENT I · THE REPRICING ============ -->
+<div class="zone" id="m1" data-m="m1">
+
+  <!-- 01 -->
+  <section class="beat" style="padding-top:calc(58px + clamp(64px,12vh,140px))">
+    <div class="measure">
+      <div class="eyebrow">
+        <span lang="en">01 · HTS Classification · MX + US</span>
+        <span lang="es">01 · Clasificación arancelaria · MX + EU</span>
+      </div>
+      <h1>
+        <span lang="en">For years, classification was paperwork.</span>
+        <span lang="es">Durante años, la clasificación fue papeleo.</span>
+      </h1>
+      <p><span lang="en">And for years, that was a reasonable way to treat it. The code went into a field. Duty was low or it was zero. Little depended on getting it exactly right, and less depended on being able to explain it later.</span>
+      <span lang="es">Y durante años, esa fue una forma razonable de tratarla. La fracción se capturaba en un campo. El arancel era bajo o era cero. Poco dependía de acertar con exactitud, y menos aún de poder explicarlo después.</span></p>
+      <p><span lang="en">That is no longer the arrangement.</span>
+      <span lang="es">Ese ya no es el acuerdo.</span></p>
+      <p><span lang="en">Measures arrive and measures lapse. What does not lapse at the same speed is the review of the period they applied to. Past operations get examined. Origin determinations get examined. The classification nobody asked you about last year is the one you are asked about two years from now.</span>
+      <span lang="es">Las medidas llegan y las medidas se levantan. Lo que no se levanta al mismo ritmo es la revisión del periodo en que estuvieron vigentes. Las operaciones pasadas se revisan. Las determinaciones de origen se revisan. La clasificación por la que nadie preguntó el año pasado es la que te preguntan dos años después.</span></p>
+      <div class="coda">
+        <span lang="en">Nobody was careless. The conditions were repriced.</span>
+        <span lang="es">Nadie fue descuidado. Las condiciones se revaluaron.</span>
+      </div>
+      <a class="btn" href="#book">
+        <span lang="en">Book a walkthrough</span>
+        <span lang="es">Agenda una demostración</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 02 + SIMULATOR -->
+  <section class="beat" id="simbeat">
+    <div class="measure">
+      <div class="eyebrow">02</div>
+      <h2>
+        <span lang="en">Ten digits decide the rest.</span>
+        <span lang="es">Diez dígitos deciden lo demás.</span>
+      </h2>
+      <p><span lang="en">Your duty rate. Your quota exposure. Which agencies have to clear it. Whether the good qualifies under a trade agreement. Whether the case that just opened has your name in it. On a large enough program, where the plant goes.</span>
+      <span lang="es">Tu tasa arancelaria. Tu exposición a cupos. Qué autoridades tienen que despacharla. Si la mercancía califica bajo un tratado. Si el caso que acaba de abrirse lleva tu nombre. En un programa suficientemente grande, dónde se instala la planta.</span></p>
+      <p><span lang="en">You built the budget on a code that carried no duty. If that determination is revisited, the rate does not begin the day it is revisited. It reaches back across every entry you have already made, already priced, and already sold.</span>
+      <span lang="es">Armaste el presupuesto sobre una fracción sin arancel. Si esa determinación se revisa, la tasa no empieza el día en que se revisa. Alcanza hacia atrás cada pedimento que ya presentaste, que ya costeaste y que ya vendiste.</span></p>
+      <div class="coda">
+        <span lang="en">Margin you spent two years ago, repriced this year.</span>
+        <span lang="es">Margen que gastaste hace dos años, revaluado este año.</span>
+      </div>
+
+      <!-- the exposure simulator: the only interactive object on the page -->
+      <div class="sim ghost" id="sim">
+        <div class="sim-controls">
+          <div>
+            <label for="simValue">
+              <span lang="en">Customs value / month</span>
+              <span lang="es">Valor en aduana / mes</span>
+            </label>
+            <input id="simValue" inputmode="numeric" autocomplete="off" spellcheck="false" value="100,000">
+          </div>
+          <div>
+            <div class="grouplabel"><span lang="en">Rate scenario</span><span lang="es">Escenario de tasa</span></div>
+            <div class="seg" id="simRates">
+              <button type="button" data-r="0">0%</button>
+              <button type="button" data-r="0.10">10%</button>
+              <button type="button" data-r="0.15">15%</button>
+              <button type="button" data-r="0.25" class="on">25%</button>
+              <button type="button" data-r="0.50">50%</button>
+            </div>
+            <div class="simnote">
+              <span lang="en">A measure being withdrawn does not close the period in which it applied. Entries made while it was in force remain subject to review, and refund or reimbursement procedures run afterward.</span>
+              <span lang="es">Que una medida se levante no cierra el periodo en que estuvo vigente. Las operaciones realizadas mientras estuvo en vigor siguen sujetas a revisión, y los procedimientos de devolución o reembolso corren después.</span>
+            </div>
+          </div>
+          <div>
+            <div class="grouplabel"><span lang="en">Periods reached</span><span lang="es">Periodos alcanzados</span></div>
+            <div class="seg" id="simReach">
+              <button type="button" data-p="quarter"><span lang="en">This quarter</span><span lang="es">Este trimestre</span></button>
+              <button type="button" data-p="year"><span lang="en">This year</span><span lang="es">Este año</span></button>
+              <button type="button" data-p="2022" class="on"><span lang="en">Back to 2022</span><span lang="es">Hasta 2022</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="framing">
+          <span lang="en">Illustrative arithmetic on figures you enter. Not advice, and not a representation about any product, measure or determination.</span>
+          <span lang="es">Aritmética ilustrativa sobre las cifras que capturas. No es asesoría, ni una afirmación sobre ningún producto, medida o determinación.</span>
+        </div>
+
+        <!-- one ruled object: the line shares the ledger's grid -->
+        <div class="ledger">
+          <div class="simplot"><svg id="simLine" aria-hidden="true"></svg></div>
+          <table class="ldg">
+            <thead><tr id="ldgHead"><th></th></tr></thead>
+            <tbody>
+              <tr id="ldgDuty"><td><span lang="en">Duty at risk</span><span lang="es">Arancel en riesgo</span></td></tr>
+              <tr id="ldgCum"><td><span lang="en">Cumulative, reaching back</span><span lang="es">Acumulado, hacia atrás</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="landing">
+          <div class="toplabel">
+            <span lang="en">Cumulative exposure</span>
+            <span lang="es">Exposición acumulada</span>
+          </div>
+          <div class="bigrow">
+            <div class="bigfig fig" id="simTotal">1,400,000</div>
+            <span class="code">8471.30.0100</span>
+          </div>
+          <div class="split">
+            <div>
+              <div class="slabel"><span lang="en">Supported</span><span lang="es">Con soporte</span></div>
+              <div class="sfig fig" id="splitA">1,400,000</div>
+            </div>
+            <div>
+              <div class="slabel"><span lang="en">Reconstructed</span><span lang="es">Reconstruida</span></div>
+              <div class="sfig fig" id="splitB">1,400,000</div>
+            </div>
+          </div>
+          <div class="splitline">
+            <span lang="en">Same exposure, two outcomes. Which column you are in is decided by whether the record exists.</span>
+            <span lang="es">La misma exposición, dos desenlaces. En qué columna estás lo decide si el registro existe.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ MOVEMENT II · THE ARRIVAL ============ -->
+<div class="zone" id="m2" data-m="m2">
+
+  <!-- 03 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">03</div>
+      <h2>
+        <span lang="en">Your system holds the code. Only the code.</span>
+        <span lang="es">Tu sistema guarda la fracción. Solo la fracción.</span>
+      </h2>
+      <p><span lang="en">Most companies do have a system of record. The code is in the ERP, in the item master, in a spreadsheet somebody maintains. What is not there is the reasoning, what it stood on, who made the call, or what has changed around it since.</span>
+      <span lang="es">La mayoría de las empresas sí tiene un sistema de registro. La fracción está en el ERP, en el catálogo de materiales, en un archivo que alguien mantiene. Lo que no está es el criterio, en qué se sostuvo, quién tomó la decisión, ni qué ha cambiado a su alrededor desde entonces.</span></p>
+      <p><span lang="en">Sometimes the support does exist, on a shared drive, in a folder someone set up years ago. Better, until one file is missing half its contents, or a wrong keystroke moves it somewhere nobody thinks to look.</span>
+      <span lang="es">A veces el soporte sí existe, en un disco compartido, en una carpeta que alguien armó hace años. Mejor, hasta que a un archivo le falta la mitad de la información, o una tecla equivocada lo mueve a donde nadie piensa buscarlo.</span></p>
+      <p><span lang="en">That is not an oversight. Those systems were built for a period when the code was a field, and a field was enough.</span>
+      <span lang="es">Eso no es un descuido. Esos sistemas se construyeron para una época en la que la fracción era un campo, y un campo bastaba.</span></p>
+      <div class="coda">
+        <span lang="en">The one thing that survived into your systems is the answer, with everything defensible removed.</span>
+        <span lang="es">Lo único que sobrevivió dentro de tus sistemas es la respuesta, sin nada de lo que la defiende.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">04</div>
+      <h2>
+        <span lang="en">And the determination arrives in an email addressed to one person.</span>
+        <span lang="es">Y la determinación llega en un correo dirigido a una persona.</span>
+      </h2>
+      <p><span lang="en">The broker replies in the body of the message: the code, sometimes a sentence of reasoning, often not.</span>
+      <span lang="es">El agente aduanal responde en el cuerpo del mensaje: la fracción, a veces una línea de criterio, muchas veces ninguna.</span></p>
+      <p><span lang="en">The attorney issues an opinion. Eight pages, every step, a PDF.</span>
+      <span lang="es">El abogado emite una opinión. Ocho páginas, cada paso, un PDF.</span></p>
+      <p><span lang="en">Someone inside decides it from specs and photos, and tells no one, because nobody asked them to.</span>
+      <span lang="es">Alguien adentro la decide con fichas técnicas y fotos, y no se lo dice a nadie, porque nadie se lo pidió.</span></p>
+      <p><span lang="en">And once in a while it arrives sideways: a consultant reviewing a bill of materials for origin, who mentions that a component has been classified wrong for four years.</span>
+      <span lang="es">Y de vez en cuando llega de lado: un consultor que revisa una lista de materiales para origen y menciona que un componente lleva cuatro años mal clasificado.</span></p>
+      <div class="coda">
+        <span lang="en">Four sources. Four levels of reasoning. One inbox, belonging to one person.</span>
+        <span lang="es">Cuatro fuentes. Cuatro niveles de criterio. Un correo, de una sola persona.</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ MOVEMENT III · THE RECONSTRUCTION ============ -->
+<div class="zone" id="m3" data-m="m3">
+
+  <!-- 05 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">05</div>
+      <h2>
+        <span lang="en">Then someone asks, and you have two weeks.</span>
+        <span lang="es">Entonces alguien pregunta, y tienes dos semanas.</span>
+      </h2>
+      <!-- the reconstruction: steps down the page, numbering running against them -->
+      <ol class="steps">
+        <li><span class="n">05</span><p>
+          <span lang="en">You search your mail to find out who made the call. The broker, the consultant, or someone here.</span>
+          <span lang="es">Buscas en el correo para saber quién tomó la decisión. El agente aduanal, el consultor, o alguien de aquí.</span></p></li>
+        <li><span class="n">04</span><p>
+          <span lang="en">You look for the thread and for what was sent with it. If you are lucky, it is all there, and you print it.</span>
+          <span lang="es">Buscas el hilo y lo que se envió con él. Con suerte está completo, y lo imprimes.</span></p></li>
+        <li><span class="n">03</span><p>
+          <span lang="en">A thread is not an answer. So you produce a classification support document. Then a formal letter, with the support behind it.</span>
+          <span lang="es">Un hilo de correo no es una respuesta. Entonces preparas un documento de soporte de clasificación. Después un escrito formal, con el soporte detrás.</span></p></li>
+        <li><span class="n">02</span><p>
+          <span lang="en">Where the reasoning is thin, you assemble support that aligns with what was already stated.</span>
+          <span lang="es">Donde el criterio es delgado, reúnes soporte que embone con lo que ya se afirmó.</span></p></li>
+        <li><span class="n">01</span><p>
+          <span lang="en">Where there is nothing, you call engineering, or production, and pull the spec sheets. You search for authority that fits. You build the file.</span>
+          <span lang="es">Donde no hay nada, le hablas a ingeniería, o a producción, y pides las fichas técnicas. Buscas fundamento que sostenga. Armas el expediente.</span></p></li>
+      </ol>
+      <p style="margin-top:26px"><span lang="en">The work is real work, done carefully, under pressure, by people who know what they are doing. It is running in the wrong direction.</span>
+      <span lang="es">El trabajo es trabajo real, hecho con cuidado, a presión, por gente que sabe lo que hace. Va en la dirección equivocada.</span></p>
+      <p><span lang="en">You are not producing your reasoning. You are producing reasoning for a conclusion someone already reached.</span>
+      <span lang="es">No estás documentando tu criterio. Estás produciendo criterio para una conclusión que alguien ya tomó.</span></p>
+      <div class="coda">
+        <span lang="en">The position was taken in 2022. The support has to be produced today.</span>
+        <span lang="es">La posición se tomó en 2022. El soporte hay que producirlo hoy.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 · the hinge: full screen, one line, the page changes state once -->
+  <section class="hinge" id="hinge">
+    <div class="measure">
+      <div class="eyebrow">06</div>
+      <h2>
+        <span lang="en">Getting the code right is one moment.<br><em>Getting the management wrong is every month after.</em></span>
+        <span lang="es">Acertar la fracción es un momento.<br><em>Gestionarla mal es cada mes después.</em></span>
+      </h2>
+      <div class="after">
+        <p><span lang="en">Get a classification wrong and you fix it. That is a bad day.</span>
+        <span lang="es">Clasifica mal y lo corriges. Es un mal día.</span></p>
+        <p><span lang="en">The same classification, used again for four years, is a different problem. You do not see the impact until it has already reached every entry that relied on it.</span>
+        <span lang="es">La misma clasificación, usada otra vez durante cuatro años, es otro problema. No ves el impacto hasta que ya alcanzó cada pedimento que se apoyó en ella.</span></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ MOVEMENT IV · THE POSITION (warm) ============ -->
+<div class="zone warm" id="m4" data-m="m4">
+
+  <!-- 07 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">07</div>
+      <h2>
+        <span lang="en">You cannot improve what you cannot see.</span>
+        <span lang="es">No puedes mejorar lo que no puedes ver.</span>
+      </h2>
+      <p><span lang="en">To correct a classification, you have to know how it was made. To optimize a duty position, you have to know what you are holding and why. To respond to a tariff action deliberately rather than reactively, you have to know which determinations it touches.</span>
+      <span lang="es">Para corregir una clasificación, tienes que saber cómo se hizo. Para optimizar una posición arancelaria, tienes que saber qué tienes y por qué. Para responder a una medida con criterio y no por reacción, tienes que saber a qué determinaciones alcanza.</span></p>
+      <p><span lang="en">None of that is available from a code in a field. All of it is available from a record of how the determination was made and what has happened to it since.</span>
+      <span lang="es">Nada de eso sale de una fracción capturada en un campo. Todo eso sale de un registro de cómo se hizo la determinación y de qué le ha pasado desde entonces.</span></p>
+      <p><span lang="en">Defense and optimization are the same problem, approached from two directions, and both sit on one foundation.</span>
+      <span lang="es">Defensa y optimización son el mismo problema, visto desde dos lados, y los dos se apoyan en la misma base.</span></p>
+      <div class="coda">
+        <span lang="en">Logic finds the code. Management is what makes it last.</span>
+        <span lang="es">La lógica encuentra la fracción. La gestión es lo que la hace durar.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 + REGISTRY -->
+  <section class="beat">
+    <div class="measure" style="max-width:none">
+      <div style="max-width:66ch">
+        <div class="eyebrow">08</div>
+        <h2>
+          <span lang="en">From an answer in someone's inbox to a position the company holds.</span>
+          <span lang="es">De una respuesta en el correo de alguien, a una posición que sostiene la empresa.</span>
+        </h2>
+        <p><span lang="en">A position is what a company can stand behind: the determination, the reasoning, what it stood on, who owned it, and everything that has touched it since. KEEL is where a position is kept.</span>
+        <span lang="es">Una posición es lo que una empresa puede sostener: la determinación, el criterio, en qué se apoyó, quién la llevó, y todo lo que la ha tocado desde entonces. KEEL es donde vive una posición.</span></p>
+        <p><span lang="en">Mexico and the United States, one system. Different legislation, different legal dispositions, the same obligation to be right and to prove it.</span>
+        <span lang="es">México y Estados Unidos, un solo sistema. Distinta legislación, distintas disposiciones legales, la misma obligación de acertar y de poder demostrarlo.</span></p>
+        <p><span lang="en">Here is where the difference is felt.</span>
+        <span lang="es">Aquí es donde se nota la diferencia.</span></p>
+
+        <div class="moments">
+          <div><p><b lang="en">Someone asks about a 2022 entry.</b><b lang="es">Alguien pregunta por un pedimento de 2022.</b>
+            <span lang="en"> You answer with the position and what it stood on, rather than rebuilding it.</span>
+            <span lang="es"> Respondes con la posición y con lo que la sostiene, en lugar de reconstruirla.</span></p></div>
+          <div><p><b lang="en">A tariff action lands on a product family.</b><b lang="es">Una medida arancelaria cae sobre una familia de productos.</b>
+            <span lang="en"> You already know which determinations it touches, before anyone asks.</span>
+            <span lang="es"> Ya sabes a qué determinaciones alcanza, antes de que alguien pregunte.</span></p></div>
+          <div><p><b lang="en">The person who made the call leaves.</b><b lang="es">Se va quien tomó la decisión.</b>
+            <span lang="en"> The position stays. That is the point.</span>
+            <span lang="es"> La posición se queda. De eso se trata.</span></p></div>
+          <div><p><b lang="en">A consultant flags a component misclassified for four years.</b><b lang="es">Un consultor detecta un componente mal clasificado durante cuatro años.</b>
+            <span lang="en"> You see every place it was used, and you correct it once.</span>
+            <span lang="es"> Ves cada lugar donde se usó, y lo corriges una vez.</span></p></div>
+          <div><p><b lang="en">A new product launches.</b><b lang="es">Sale un producto nuevo.</b>
+            <span lang="en"> The question gets asked once, and stays answered.</span>
+            <span lang="es"> La pregunta se hace una vez, y se queda contestada.</span></p></div>
+        </div>
+      </div>
+
+      <!-- the registry, inverted: the code is the smallest, greyest column -->
+      <div class="reg">
+        <table class="registry">
+          <thead><tr>
+            <th><span lang="en">Description</span><span lang="es">Descripción</span></th>
+            <th class="c-jur">Jur.</th>
+            <th><span lang="en">Status</span><span lang="es">Estado</span></th>
+            <th class="c-dt"><span lang="en">Last reviewed</span><span lang="es">Última revisión</span></th>
+            <th class="c-code"><span lang="en">Code</span><span lang="es">Fracción</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="desc"><span lang="en">Portable data-processing unit, ≤ 10 kg</span><span lang="es">Unidad portátil de proceso de datos, ≤ 10 kg</span></td><td class="jur">US</td><td class="st"><span lang="en">Determined</span><span lang="es">Determinada</span></td><td class="dt">2026-06-18</td><td class="c-code"><span class="code">8471.30.0100</span></td></tr>
+            <tr><td class="desc"><span lang="en">Signal reception / conversion apparatus</span><span lang="es">Aparato de recepción y conversión de señal</span></td><td class="jur">MX</td><td class="st"><span lang="en">On watch</span><span lang="es">Vigilancia</span></td><td class="dt">2026-05-30</td><td class="c-code"><span class="code">8517.62.02</span></td></tr>
+            <tr><td class="desc"><span lang="en">Other articles of plastics, industrial</span><span lang="es">Las demás manufacturas de plástico, industrial</span></td><td class="jur">MX</td><td class="st"><span lang="en">In review</span><span lang="es">En revisión</span></td><td class="dt">2026-07-02</td><td class="c-code"><span class="code">3926.90.99</span></td></tr>
+            <tr><td class="desc"><span lang="en">Threaded fasteners of steel, other</span><span lang="es">Sujetadores roscados de acero, los demás</span></td><td class="jur">US</td><td class="st"><span lang="en">Determined</span><span lang="es">Determinada</span></td><td class="dt">2026-04-11</td><td class="c-code"><span class="code">7318.15.8066</span></td></tr>
+            <tr><td class="desc"><span lang="en">Body parts and accessories, motor vehicles</span><span lang="es">Partes y accesorios de carrocería, vehículos</span></td><td class="jur">US</td><td class="st"><span lang="en">On watch</span><span lang="es">Vigilancia</span></td><td class="dt">2026-07-14</td><td class="c-code"><span class="code">8708.29.5160</span></td></tr>
+            <tr><td class="desc"><span lang="en">Static converters, power supply</span><span lang="es">Convertidores estáticos, fuente de poder</span></td><td class="jur">MX</td><td class="st"><span lang="en">Determined</span><span lang="es">Determinada</span></td><td class="dt">2026-03-27</td><td class="c-code"><span class="code">8504.40.14</span></td></tr>
+            <tr><td class="desc"><span lang="en">Metal furniture, other than seats</span><span lang="es">Muebles de metal, excepto asientos</span></td><td class="jur">US</td><td class="st"><span lang="en">In review</span><span lang="es">En revisión</span></td><td class="dt">2026-07-19</td><td class="c-code"><span class="code">9403.20.0090</span></td></tr>
+            <tr><td class="desc"><span lang="en">PET in primary forms, high viscosity</span><span lang="es">PET en formas primarias, alta viscosidad</span></td><td class="jur">MX</td><td class="st"><span lang="en">Determined</span><span lang="es">Determinada</span></td><td class="dt">2026-02-09</td><td class="c-code"><span class="code">3907.61.01</span></td></tr>
+            <tr><td class="desc"><span lang="en">Flat-rolled steel, zinc coated, other</span><span lang="es">Acero plano laminado, cincado, los demás</span></td><td class="jur">MX</td><td class="st"><span lang="en">On watch</span><span lang="es">Vigilancia</span></td><td class="dt">2026-07-21</td><td class="c-code"><span class="code">7210.49.99</span></td></tr>
+            <tr><td class="desc"><span lang="en">T-shirts, knit, of cotton, men's</span><span lang="es">Playeras de punto, de algodón, para hombre</span></td><td class="jur">US</td><td class="st"><span lang="en">Determined</span><span lang="es">Determinada</span></td><td class="dt">2026-05-05</td><td class="c-code"><span class="code">6109.10.0012</span></td></tr>
+          </tbody>
+        </table>
+        <div class="regnote">
+          <span lang="en">Illustrative records. The real thing, we'd rather show you than describe.</span>
+          <span lang="es">Registros ilustrativos. Lo real, preferimos mostrártelo que describirlo.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">09</div>
+      <h2>
+        <span lang="en">We all dreamed of the big team.</span>
+        <span lang="es">Todos soñamos con el equipo grande.</span>
+      </h2>
+      <p><span lang="en">One person for compliance. One for classification. One for logistics. For most companies that team does not exist. It is you, and maybe a few others, carrying all of it, while operations never pause to let you catch up.</span>
+      <span lang="es">Una persona para cumplimiento. Una para clasificación. Una para logística. En la mayoría de las empresas ese equipo no existe. Eres tú, y quizá algunos más, cargando con todo, mientras las operaciones nunca se detienen para que te pongas al día.</span></p>
+      <p><span lang="en">So this was built for the company you actually run, not the one on the org chart. We do not replace your broker, your consultant, or your attorney. Keep all four sources. They stay exactly as they are, and they land in the same place, with their reasoning attached, belonging to the company.</span>
+      <span lang="es">Por eso esto se hizo para la empresa que de verdad operas, no la del organigrama. No sustituimos a tu agente aduanal, ni a tu consultor, ni a tu abogado. Quédate con las cuatro fuentes. Se quedan tal como están, y llegan al mismo lugar, con su criterio detrás, siendo de la empresa.</span></p>
+      <p><span lang="en">The determination still arrives the way it always has. It stops being the end of it.</span>
+      <span lang="es">La determinación sigue llegando como siempre ha llegado. Deja de terminar ahí.</span></p>
+      <p><span lang="en">A system that demands new habits is abandoned by the second week, and we have watched it happen.</span>
+      <span lang="es">Un sistema que exige hábitos nuevos se abandona a la segunda semana, y lo hemos visto pasar.</span></p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="beat">
+    <div class="measure">
+      <div class="eyebrow">10</div>
+      <h2>
+        <span lang="en">Reasoning has structure. That is why it can be systematized.</span>
+        <span lang="es">El criterio tiene estructura. Por eso se puede sistematizar.</span>
+      </h2>
+      <p><span lang="en">Anyone can point a language model at a tariff schedule. That is a guess with a confident voice, and a guess is not a position.</span>
+      <span lang="es">Cualquiera puede apuntar un modelo de lenguaje a una tarifa. Eso es una suposición con voz segura, y una suposición no es una posición.</span></p>
+      <p><span lang="en">Classification reasoning has a structure. KEEL is the systematization of that structure, built over years in HTS and customs compliance, and made repeatable.</span>
+      <span lang="es">El criterio de clasificación tiene una estructura. KEEL es la sistematización de esa estructura, construida durante años en clasificación arancelaria y cumplimiento aduanero, y hecha repetible.</span></p>
+      <p><span lang="en">It is also why the research is assisted and the determination is not. An opinion belongs to the person who signs it. The research, the regulation, the rulings, the missing pieces get gathered; then it steps aside.</span>
+      <span lang="es">Por eso también la investigación es asistida y la determinación no. Una opinión es de quien la firma. Se reúne la investigación, la regulación, las resoluciones, lo que falta; y después se hace a un lado.</span></p>
+      <p><span lang="en">And if your policy keeps AI out, switch it off. The position still holds.</span>
+      <span lang="es">Y si tu política deja la IA fuera, se apaga. La posición se sostiene igual.</span></p>
+      <div class="coda">
+        <span lang="en">AI augmentation. Not AI automation.</span>
+        <span lang="es">Aumento con IA. No automatización con IA.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="beat" id="book">
+    <div class="measure">
+      <div class="eyebrow">11</div>
+      <h2>
+        <span lang="en">The rest, we'll show you.</span>
+        <span lang="es">Lo demás, te lo mostramos.</span>
+      </h2>
+      <p><span lang="en">No login handed over, no walking away. Customs people showing customs people, answering the questions only this work teaches you to ask.</span>
+      <span lang="es">Nada de darte un acceso y desaparecer. Gente de aduanas mostrándole a gente de aduanas, respondiendo las preguntas que solo este trabajo te enseña a hacer.</span></p>
+      <p><span lang="en">We wrote these recommendations for companies for years, and watched them go unimplemented. Not because anyone disagreed. Because the work already did not fit in the day. This is the version that fits.</span>
+      <span lang="es">Escribimos estas recomendaciones para empresas durante años, y las vimos quedarse sin implementar. No porque alguien no estuviera de acuerdo. Porque el trabajo ya no cabía en el día. Esta es la versión que sí cabe.</span></p>
+      <a class="btn" href="#">
+        <span lang="en">Let us show you our approach</span>
+        <span lang="es">Déjanos mostrarte nuestro enfoque</span>
+      </a>
+      <p class="sig">
+        <span lang="en">We know. Because we're customs people too.</span>
+        <span lang="es">Lo sabemos. Porque también somos gente de aduanas.</span>
+      </p>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  <span>KEEL © 2026</span>
+  <span lang="en">HTS classification — MX + US</span>
+  <span lang="es">Clasificación arancelaria — MX + EU</span>
+  <a href="../"><span lang="en">Concept index</span><span lang="es">Índice de conceptos</span></a>
+</footer>
+
+<script>
+// ---- language toggle (shared key with v1) ----
+const langBtns = document.querySelectorAll('.lang button');
+function setLang(l){
+  document.documentElement.lang = l;
+  langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+  try{ localStorage.setItem('keel-lang', l); }catch(e){}
+  simRender();
+}
+langBtns.forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+
+// ---- the tonal cut: the page changes state once, at the hinge ----
+const hinge = document.getElementById('hinge');
+function hingeCheck(){
+  const r = hinge.getBoundingClientRect();
+  document.body.classList.toggle('past-hinge', r.bottom < window.innerHeight * 0.5);
+}
+window.addEventListener('scroll', hingeCheck, {passive:true});
+
+// ---- movement nav: current marked, others low contrast ----
+const movs = document.querySelectorAll('.zone[data-m]');
+const navLinks = document.querySelectorAll('.movnav a');
+const movIO = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if(e.isIntersecting){
+      navLinks.forEach(a => a.classList.toggle('on', a.dataset.m === e.target.dataset.m));
+    }
+  });
+}, {rootMargin:'-40% 0px -55% 0px'});
+movs.forEach(m => movIO.observe(m));
+
+// ================= THE EXPOSURE SIMULATOR =================
+const sim = document.getElementById('sim');
+const YEARS = [2022, 2023, 2024, 2025, 2026];
+const NOW_MONTHS_YTD = Math.max(1, new Date().getMonth() + 1); // months of the current year with entries
+const reduceMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+const st = { monthly: 100000, rate: 0.25, reach: '2022' };
+let drawProgress = (reduceMotion || window.innerWidth < 860) ? 1 : 0; // never reverses. once drawn, drawn.
+
+function monthsFor(y){
+  if(y < 2026) return 12;
+  return st.reach === 'quarter' ? 3 : NOW_MONTHS_YTD;
+}
+function included(y){
+  if(st.reach === '2022') return true;
+  return y === 2026;
+}
+function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+
+function compute(){
+  const rows = YEARS.map(y => {
+    const inc = included(y);
+    return { y, inc, duty: inc ? st.monthly * monthsFor(y) * st.rate : 0 };
+  });
+  // cumulative reaches back: accumulate from today toward 2022
+  let acc = 0;
+  for(let i = rows.length - 1; i >= 0; i--){
+    if(rows[i].inc){ acc += rows[i].duty; rows[i].cum = acc; }
+    else rows[i].cum = null;
+  }
+  return { rows, total: acc };
+}
+
+// build the ledger cells once; recompute in place afterwards (no re-animation)
+const headRow = document.getElementById('ldgHead');
+const dutyRow = document.getElementById('ldgDuty');
+const cumRow  = document.getElementById('ldgCum');
+YEARS.forEach(y => {
+  headRow.insertAdjacentHTML('beforeend', `<th>${y}</th>`);
+  dutyRow.insertAdjacentHTML('beforeend', `<td class="fig" data-duty="${y}"></td>`);
+  cumRow.insertAdjacentHTML('beforeend', `<td class="fig" data-cum="${y}"></td>`);
+});
+
+const svg = document.getElementById('simLine');
+const NS = 'http://www.w3.org/2000/svg';
+
+function simRender(){
+  const { rows, total } = compute();
+
+  rows.forEach(r => {
+    const d = dutyRow.querySelector(`[data-duty="${r.y}"]`);
+    const c = cumRow.querySelector(`[data-cum="${r.y}"]`);
+    d.textContent = r.inc ? fmt(r.duty) : '—';
+    c.textContent = r.inc ? fmt(r.cum) : '—';
+    d.classList.toggle('out', !r.inc);
+    c.classList.toggle('out', !r.inc);
+  });
+
+  document.getElementById('simTotal').textContent = fmt(total);
+  document.getElementById('splitA').textContent = fmt(total);
+  document.getElementById('splitB').textContent = fmt(total);
+
+  drawLine(rows, total);
+}
+
+function drawLine(rows, total){
+  const W = svg.clientWidth || 600, H = 170, padTop = 26, padBot = 14;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const inc = rows.filter(r => r.inc);
+  if(!inc.length || total <= 0) return;
+
+  const x = i => (i + 0.5) / YEARS.length * W;
+  const y = v => H - padBot - (v / total) * (H - padTop - padBot);
+
+  // points ordered right to left: today first, backward into closed periods
+  const pts = inc.map(r => ({ px: x(YEARS.indexOf(r.y)), py: y(r.cum), r })).reverse();
+
+  if(pts.length > 1){
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('class', 'stroke');
+    path.setAttribute('d', pts.map((p, i) => (i ? 'L' : 'M') + p.px.toFixed(1) + ',' + p.py.toFixed(1)).join(''));
+    svg.appendChild(path);
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len * (1 - drawProgress);
+  }
+
+  // a hairline and three labeled points
+  const labelIdx = new Set([0, Math.floor((pts.length - 1) / 2), pts.length - 1]);
+  pts.forEach((p, i) => {
+    const vis = drawProgress >= (pts.length > 1 ? i / (pts.length - 1) : 1) - 0.001;
+    if(!vis) return;
+    const dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('cx', p.px); dot.setAttribute('cy', p.py); dot.setAttribute('r', 2.6);
+    dot.setAttribute('fill', 'currentColor');
+    dot.setAttribute('class', 'fig');
+    svg.appendChild(dot);
+    if(labelIdx.has(i)){
+      const t = document.createElementNS(NS, 'text');
+      const anchor = p.px < 70 ? 'start' : (p.px > W - 70 ? 'end' : 'middle');
+      t.setAttribute('x', p.px); t.setAttribute('y', Math.max(12, p.py - 10));
+      t.setAttribute('text-anchor', anchor);
+      t.textContent = fmt(p.r.cum);
+      svg.appendChild(t);
+    }
+  });
+}
+
+// scroll-driven draw: right to left, completes at ~60% of section scroll, never reverses
+const simbeat = document.getElementById('simbeat');
+function simScroll(){
+  if(drawProgress >= 1) return;
+  const rect = simbeat.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const travelled = vh * 0.85 - rect.top;
+  const span = Math.max(1, (rect.height + vh * 0.3) * 0.6);
+  const p = Math.min(1, Math.max(0, travelled / span));
+  if(p > drawProgress){
+    drawProgress = p;
+    simRender();
+  }
+}
+window.addEventListener('scroll', simScroll, {passive:true});
+window.addEventListener('resize', () => simRender(), {passive:true});
+
+// controls
+document.getElementById('simRates').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  st.rate = parseFloat(b.dataset.r);
+  b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  simRender();
+});
+document.getElementById('simReach').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  st.reach = b.dataset.p;
+  b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  simRender();
+});
+
+// the reader brings the number: on entry, nothing moves — the grey turns to ink
+const valInput = document.getElementById('simValue');
+valInput.addEventListener('input', () => {
+  const raw = valInput.value.replace(/[^\d]/g, '');
+  const n = parseInt(raw || '0', 10);
+  if(n > 0){
+    st.monthly = n;
+    sim.classList.remove('ghost');
+  } else {
+    st.monthly = 100000;
+  }
+  simRender();
+});
+valInput.addEventListener('blur', () => {
+  const raw = valInput.value.replace(/[^\d]/g, '');
+  if(raw) valInput.value = parseInt(raw, 10).toLocaleString('en-US');
+  else { valInput.value = '100,000'; }
+});
+
+// init
+try{
+  const saved = localStorage.getItem('keel-lang');
+  if(saved === 'es' || saved === 'en') setLang(saved); else simRender();
+}catch(e){ simRender(); }
+hingeCheck();
+simScroll();
+</script>
+</body>
+</html>
