@@ -6,7 +6,7 @@ Two parallel landing-page concepts for KEEL, kept side by side for comparison. N
 |---|---|---|---|
 | `/` | Chooser index | — | Minimal door page linking both versions. |
 | `/v1/` | **A — The Registry** | EN rev 3 (CARD-2026-003) + ES (CARD-2026-006) | Index/archive aesthetic inspired by [zchry.org](https://www.zchry.org/): grotesque + mono, numbered sections, filterable classification registry, scroll reveals. |
-| `/v2/` | **B — The Position** | rev 7 (EN/ES, for build) | Legal-opinion reference world. Governing rule: the code is never the hero (small/mono/grey everywhere). Exposure simulator (ghost state, right-to-left line) as the only interactive object; registry restored static and inverted; four-movement nav; cold→warm tonal cut at the hinge; motion inventory limited to the line and the cut. |
+| `/v2/` | **B — The Position** | rev 7 (EN/ES, for build) | Vooma-style design system (`keel-design-system.md`): warm cream + ink + one orange accent, Archivo + IBM Plex Mono, section index rows (01–11), card/chip/pill components, SVG line diagrams, dark inversion at 05, full-orange CTA at 11. Structure and copy stay rev 7: exposure simulator (ghost state, ledger + right-to-left scroll-drawn line, Supported/Reconstructed split), registry table, countdown steps, four-movement nav, EN/ES toggle. |
 
 ## Deploy
 
