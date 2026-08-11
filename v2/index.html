@@ -199,15 +199,34 @@
   .statement-card .big{font-size:28px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
   .statement-card .big span{color:var(--accent)}
 
-  /* registry table */
-  .table-panel{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden}
-  .trow{display:grid;grid-template-columns:5fr 1fr 2fr 2fr 2fr;gap:16px;padding:14px 28px;border-bottom:1px solid var(--line-faint);font-size:14px;align-items:center}
+  /* the registry, shown as the product: a framed KEEL portal screen.
+     Visual language mirrors the app's "Datasheet" system: h-14 header bar,
+     uppercase micro-labels, dot+word status tags (never filled pills),
+     3px-radius bordered table, mono codes and dates. */
+  .app-frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);box-shadow:0 1px 0 var(--line)}
+  .app-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card)}
+  .app-bar i{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none}
+  .app-bar .url{font-family:var(--mono);font-size:12px;color:var(--ink-muted);margin-left:8px}
+  .app-head{display:flex;align-items:center;gap:24px;height:52px;padding:0 20px;border-bottom:1px solid var(--line)}
+  .app-head .brand{font-weight:700;font-size:14px;letter-spacing:.3em}
+  .app-head nav{display:flex;gap:18px;font-size:13px;font-weight:500;color:var(--ink-muted);flex:1}
+  .app-head nav span.on{color:var(--ink)}
+  .app-btn{font-size:11px;font-weight:300;text-transform:uppercase;letter-spacing:.07em;background:var(--accent);color:#fff;padding:7px 14px;border-radius:3px;white-space:nowrap}
+  .app-body{padding:18px 20px 20px}
+  .app-title{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted);margin-bottom:10px}
+  .app-table{background:var(--card);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .trow{display:grid;grid-template-columns:5fr 1fr 2.2fr 2fr 2fr;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line-faint);font-size:13.5px;align-items:center}
   .trow:last-child{border-bottom:none}
-  .trow.head{padding:16px 28px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted)}
-  .trow .desc{color:var(--ink)}
-  .trow .meta{font-family:var(--mono);font-size:13px;color:var(--ink-muted)}
-  .trow .code{font-family:var(--mono);font-size:13px;color:var(--ink-muted);text-align:right}
-  .trow.head .code{color:var(--ink-muted)}
+  .trow.head{padding:11px 16px;border-bottom:1px solid var(--line);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted);font-family:var(--sans)}
+  .trow .desc{color:var(--ink);font-weight:500}
+  .trow .meta{font-family:var(--mono);font-size:12.5px;color:var(--ink-muted)}
+  .trow .code{font-family:var(--mono);font-size:12.5px;color:var(--ink-muted);text-align:right}
+  /* dot + word status, the app's .tag component */
+  .ktag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+  .ktag::before{content:"";width:6px;height:6px;border-radius:9999px;background:currentColor;flex:none}
+  .ktag.ok{color:var(--ok)}
+  .ktag.review{color:#96660F}
+  .ktag.watch{color:#C03A2A}
 
   /* statement pill (10) */
   .stpill{margin-top:48px;display:inline-flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:14px 28px}
@@ -641,24 +660,39 @@
         <span lang="es">La pregunta se hace una vez, y se queda contestada.</span></div>
     </div>
 
-    <div class="table-panel">
-      <div class="trow head">
-        <span><span lang="en">Description</span><span lang="es">Descripción</span></span>
-        <span class="h-jur">Jur.</span>
-        <span><span lang="en">Status</span><span lang="es">Estado</span></span>
-        <span class="h-date"><span lang="en">Last reviewed</span><span lang="es">Última revisión</span></span>
-        <span class="code"><span lang="en">Code</span><span lang="es">Fracción</span></span>
+    <div class="app-frame">
+      <div class="app-bar"><i></i><i></i><i></i><span class="url">keel.trade-focus.com</span></div>
+      <div class="app-head">
+        <span class="brand">KEEL</span>
+        <nav aria-hidden="true">
+          <span class="on"><span lang="en">Requests</span><span lang="es">Solicitudes</span></span>
+          <span><span lang="en">Products</span><span lang="es">Productos</span></span>
+          <span><span lang="en">History</span><span lang="es">Historial</span></span>
+        </nav>
+        <span class="app-btn"><span lang="en">New request</span><span lang="es">Nueva solicitud</span></span>
       </div>
-      <div class="trow"><span class="desc"><span lang="en">Portable data-processing unit, ≤ 10 kg</span><span lang="es">Unidad portátil de proceso de datos, ≤ 10 kg</span></span><span class="meta jur">US</span><span class="pill ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-06-18</span><span class="code">8471.30.0100</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Signal reception / conversion apparatus</span><span lang="es">Aparato de recepción y conversión de señal</span></span><span class="meta jur">MX</span><span class="pill warn"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-05-30</span><span class="code">8517.62.02</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Other articles of plastics, industrial</span><span lang="es">Las demás manufacturas de plástico, industrial</span></span><span class="meta jur">MX</span><span class="pill neutral"><span lang="en">In review</span><span lang="es">En revisión</span></span><span class="meta date">2026-07-02</span><span class="code">3926.90.99</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Threaded fasteners of steel, other</span><span lang="es">Sujetadores roscados de acero, los demás</span></span><span class="meta jur">US</span><span class="pill ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-04-11</span><span class="code">7318.15.8066</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Body parts and accessories, motor vehicles</span><span lang="es">Partes y accesorios de carrocería, vehículos</span></span><span class="meta jur">US</span><span class="pill warn"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-07-14</span><span class="code">8708.29.5160</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Static converters, power supply</span><span lang="es">Convertidores estáticos, fuente de poder</span></span><span class="meta jur">MX</span><span class="pill ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-03-27</span><span class="code">8504.40.14</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Metal furniture, other than seats</span><span lang="es">Muebles de metal, excepto asientos</span></span><span class="meta jur">US</span><span class="pill neutral"><span lang="en">In review</span><span lang="es">En revisión</span></span><span class="meta date">2026-07-19</span><span class="code">9403.20.0090</span></div>
-      <div class="trow"><span class="desc"><span lang="en">PET in primary forms, high viscosity</span><span lang="es">PET en formas primarias, alta viscosidad</span></span><span class="meta jur">MX</span><span class="pill ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-02-09</span><span class="code">3907.61.01</span></div>
-      <div class="trow"><span class="desc"><span lang="en">Flat-rolled steel, zinc coated, other</span><span lang="es">Acero plano laminado, cincado, los demás</span></span><span class="meta jur">MX</span><span class="pill warn"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-07-21</span><span class="code">7210.49.99</span></div>
-      <div class="trow"><span class="desc"><span lang="en">T-shirts, knit, of cotton, men's</span><span lang="es">Playeras de punto, de algodón, para hombre</span></span><span class="meta jur">US</span><span class="pill ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-05-05</span><span class="code">6109.10.0012</span></div>
+      <div class="app-body">
+        <div class="app-title"><span lang="en">Classification records</span><span lang="es">Registros de clasificación</span></div>
+        <div class="app-table">
+          <div class="trow head">
+            <span><span lang="en">Product</span><span lang="es">Producto</span></span>
+            <span class="h-jur">Jur.</span>
+            <span><span lang="en">Status</span><span lang="es">Estado</span></span>
+            <span class="h-date"><span lang="en">Last reviewed</span><span lang="es">Última revisión</span></span>
+            <span class="code"><span lang="en">Code</span><span lang="es">Fracción</span></span>
+          </div>
+          <div class="trow"><span class="desc"><span lang="en">Portable data-processing unit, ≤ 10 kg</span><span lang="es">Unidad portátil de proceso de datos, ≤ 10 kg</span></span><span class="meta jur">US</span><span class="ktag ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-06-18</span><span class="code">8471.30.0100</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Signal reception / conversion apparatus</span><span lang="es">Aparato de recepción y conversión de señal</span></span><span class="meta jur">MX</span><span class="ktag watch"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-05-30</span><span class="code">8517.62.02</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Other articles of plastics, industrial</span><span lang="es">Las demás manufacturas de plástico, industrial</span></span><span class="meta jur">MX</span><span class="ktag review"><span lang="en">In review</span><span lang="es">En revisión</span></span><span class="meta date">2026-07-02</span><span class="code">3926.90.99</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Threaded fasteners of steel, other</span><span lang="es">Sujetadores roscados de acero, los demás</span></span><span class="meta jur">US</span><span class="ktag ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-04-11</span><span class="code">7318.15.8066</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Body parts and accessories, motor vehicles</span><span lang="es">Partes y accesorios de carrocería, vehículos</span></span><span class="meta jur">US</span><span class="ktag watch"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-07-14</span><span class="code">8708.29.5160</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Static converters, power supply</span><span lang="es">Convertidores estáticos, fuente de poder</span></span><span class="meta jur">MX</span><span class="ktag ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-03-27</span><span class="code">8504.40.14</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Metal furniture, other than seats</span><span lang="es">Muebles de metal, excepto asientos</span></span><span class="meta jur">US</span><span class="ktag review"><span lang="en">In review</span><span lang="es">En revisión</span></span><span class="meta date">2026-07-19</span><span class="code">9403.20.0090</span></div>
+          <div class="trow"><span class="desc"><span lang="en">PET in primary forms, high viscosity</span><span lang="es">PET en formas primarias, alta viscosidad</span></span><span class="meta jur">MX</span><span class="ktag ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-02-09</span><span class="code">3907.61.01</span></div>
+          <div class="trow"><span class="desc"><span lang="en">Flat-rolled steel, zinc coated, other</span><span lang="es">Acero plano laminado, cincado, los demás</span></span><span class="meta jur">MX</span><span class="ktag watch"><span lang="en">On watch</span><span lang="es">Vigilancia</span></span><span class="meta date">2026-07-21</span><span class="code">7210.49.99</span></div>
+          <div class="trow"><span class="desc"><span lang="en">T-shirts, knit, of cotton, men's</span><span lang="es">Playeras de punto, de algodón, para hombre</span></span><span class="meta jur">US</span><span class="ktag ok"><span lang="en">Determined</span><span lang="es">Determinada</span></span><span class="meta date">2026-05-05</span><span class="code">6109.10.0012</span></div>
+        </div>
+      </div>
     </div>
     <p class="caption" style="margin-top:16px">
       <span lang="en">Illustrative records. The real thing, we'd rather show you than describe.</span>
