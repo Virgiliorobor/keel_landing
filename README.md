@@ -18,13 +18,11 @@ Both `/index.html` and `/keel/index.html` have a config block at the top of thei
 
 ## Deploy
 
-`.github/workflows/pages.yml` deploys the repo root to GitHub Pages on every push to this branch. Live at `https://virgiliorobor.github.io/keel_landing/`.
+**Production** is the operator's own server (same box as the KEEL portal): serve the repo root as a static site at `trade-focus.com` — `/` is the Trade Focus manifesto page, `/keel/` the product landing. With the existing Caddy setup, a site block like `trade-focus.com { root * /srv/trade-focus  file_server }` (plus the repo contents at that root) is all it needs; `keel.` and `s3.` subdomains are unaffected.
 
-### Pointing trade-focus.com here
+**Staging**: `.github/workflows/pages.yml` deploys the repo root to GitHub Pages on every push to this branch — `https://virgiliorobor.github.io/keel_landing/` — for review only.
 
-1. DNS: apex `trade-focus.com` → GitHub Pages A records (185.199.108.153 / .109. / .110. / .111.) + `www` CNAME to `virgiliorobor.github.io`. The `keel.` and `s3.` subdomains keep pointing at the app server — unaffected.
-2. Repo: add a `CNAME` file at the root containing `trade-focus.com` (or set the custom domain in Settings → Pages, which commits it).
-3. Enforce HTTPS in Settings → Pages once the certificate is issued.
+The Trade Focus page design follows mosey.com's language (warm paper, deep green, pastel cards, pill buttons, big footer); the ES manifesto is a localization pending founder review.
 
 ## v2 build notes (rev 7 §8 compliance)
 
