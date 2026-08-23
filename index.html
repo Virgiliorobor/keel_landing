@@ -3,68 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEEL — Working concepts</title>
-<meta name="robots" content="noindex">
+<title>Trade Focus — Customs &amp; trade compliance, MX + US</title>
+<meta name="description" content="Customs, carried by customs people. Classification, origin, and the compliance work that keeps trade moving — Mexico and the United States.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#f4f3f0;--ink:#101012;--grey:#5f5d58;--faint:rgba(16,16,18,.14);
-    --serif:'Newsreader',Georgia,serif;
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --bg:#F8FAF0;
+    --bg-2:#F1F4E4;
+    --ink:#1A1A14;
+    --ink-soft:#3A3A30;
+    --ink-muted:#6B6B5E;
+    --ink-faint:#8A8A7A;
+    --accent:#FF4D00;
+    --accent-tint:#FFF3EC;
+    --accent-on-dark-1:#FFE4D6;
+    --accent-on-dark-2:#FFD2BC;
+    --card:#FFFFFF;
+    --line:#E0E0D0;
+    --sans:'Archivo',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    background:var(--paper);color:var(--ink);font-family:var(--serif);
-    min-height:100vh;display:flex;flex-direction:column;
-    padding:clamp(24px,5vw,72px);-webkit-font-smoothing:antialiased;
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--accent);color:var(--bg)}
+  a{color:inherit;text-decoration:none;transition:color .15s ease,background .15s ease}
+
+  html[lang="en"] [lang="es"]{display:none !important}
+  html[lang="es"] [lang="en"]{display:none !important}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+  section{border-bottom:1px solid var(--line)}
+  .sec{padding:88px 0}
+  section.alt{background:var(--bg-2)}
+
+  .idx{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--ink-muted);margin-bottom:32px}
+  .idx .n{color:var(--accent)}
+  .idx .dash{width:32px;height:1px;background:var(--accent);display:inline-block}
+
+  h1{font-size:clamp(40px,6.5vw,72px);line-height:1.04;letter-spacing:-.03em;font-weight:800;margin:0 0 40px;max-width:880px;text-wrap:pretty}
+  h2{font-size:clamp(28px,4vw,44px);line-height:1.06;letter-spacing:-.02em;font-weight:800;margin:0 0 36px;max-width:800px;text-wrap:pretty}
+  .body{font-size:17px;line-height:1.65;color:var(--ink-soft);display:flex;flex-direction:column;gap:18px}
+  .body p{margin:0}
+  .body .strong{font-weight:600;color:var(--ink)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+
+  .btn{display:inline-block;background:var(--accent);color:var(--bg);padding:14px 30px;border-radius:999px;font-size:16px;font-weight:600;border:none;cursor:pointer}
+  .btn:hover{background:var(--ink);color:var(--bg)}
+  .btn.small{padding:10px 22px;font-size:14px}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--bg)}
+
+  nav.top{position:sticky;top:0;z-index:50;background:rgba(248,250,240,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.top .wrap{height:64px;display:flex;align-items:center;gap:28px}
+  .wordmark{font-weight:800;font-size:18px;letter-spacing:.14em}
+  .navlinks{display:flex;gap:24px;font-size:14px;font-weight:500;flex:1}
+  .navlinks a{color:var(--ink-muted)}
+  .navlinks a:hover{color:var(--accent)}
+  .lang{display:flex;gap:6px;font-family:var(--mono);font-size:12px}
+  .lang button{font-family:inherit;font-size:inherit;background:var(--bg);border:1px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .15s ease}
+  .lang button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;font-size:15px;line-height:1.55;color:var(--ink-soft)}
+  .card .kicker{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em}
+  .card .lead{font-size:17px;font-weight:700;color:var(--ink);display:block;margin-bottom:8px}
+
+  /* KEEL product band */
+  .keel-band{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:36px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center}
+  .keel-band .mark{font-weight:800;letter-spacing:.3em;font-size:15px;margin-bottom:10px}
+  .keel-band .line{font-size:clamp(20px,2.4vw,28px);font-weight:700;letter-spacing:-.01em;max-width:26ch;line-height:1.25}
+  .keel-band .sub{font-size:15px;color:var(--ink-muted);margin-top:10px;max-width:52ch}
+
+  /* contact */
+  .contact-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;max-width:720px;color:var(--ink)}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .cfield{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .cfield label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted)}
+  .cfield input,.cfield textarea{font-family:var(--sans);font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;resize:vertical}
+  .cfield input:focus,.cfield textarea:focus{outline:none;border-color:var(--accent)}
+  .form-note{font-family:var(--mono);font-size:12px;color:var(--ink-muted);margin-top:12px;display:none}
+  .form-note.show{display:block}
+  .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+
+  footer{background:var(--ink);color:var(--ink-faint)}
+  footer .wrap{padding:32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:13px;font-family:var(--mono)}
+  footer .fm{color:var(--bg);font-weight:700;font-family:var(--sans);letter-spacing:.1em}
+  footer .fm span{color:var(--ink-faint);font-weight:400}
+  footer a:hover{color:var(--accent)}
+
+  @media(max-width:960px){
+    .sec{padding:64px 0}
+    .wrap{padding:0 20px}
+    .g2{grid-template-columns:1fr;gap:36px}
+    .cards{grid-template-columns:1fr}
+    .navlinks{display:none}
+    .keel-band{grid-template-columns:1fr}
   }
-  .top{display:flex;align-items:center;justify-content:space-between;
-    font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey)}
-  .brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:500;letter-spacing:.22em;font-size:13px}
-  main{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:980px}
-  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-bottom:34px}
-  a.entry{display:block;text-decoration:none;color:inherit;border-top:1px solid var(--ink);padding:30px 0 34px}
-  a.entry:last-of-type{border-bottom:1px solid var(--ink)}
-  .row{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap}
-  .tag{font-family:var(--mono);font-size:12px;color:var(--grey);min-width:26px}
-  h2{font-weight:400;font-size:clamp(30px,4.6vw,54px);letter-spacing:-.01em;line-height:1.05}
-  h2 span{transition:opacity .2s ease}
-  a.entry:hover h2{font-style:italic}
-  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--grey);margin-top:12px;line-height:1.8;max-width:60ch}
-  footer{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);
-    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @media(max-width:560px){.cgrid{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body id="top">
 
-<div class="top">
-  <div class="brand">
-    <svg width="14" height="15" viewBox="0 0 18 20" fill="none"><path d="M9 0 L18 20 L0 20 Z" fill="currentColor"/></svg>
-    KEEL
+<nav class="top">
+  <div class="wrap">
+    <a class="wordmark" href="#top">TRADE&nbsp;FOCUS</a>
+    <div class="navlinks">
+      <a href="#services"><span lang="en">What we do</span><span lang="es">Qué hacemos</span></a>
+      <a href="keel/">KEEL</a>
+      <a href="#contact"><span lang="en">Contact</span><span lang="es">Contacto</span></a>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" class="on">EN</button>
+      <button type="button" data-lang="es">ES</button>
+    </div>
+    <a class="btn small" href="#contact"><span lang="en">Talk to us</span><span lang="es">Hablemos</span></a>
   </div>
-  <span>Working concepts — internal</span>
-</div>
+</nav>
 
 <main>
-  <div class="kicker">Two directions, one story. Pick a door.</div>
 
-  <a class="entry" href="v1/">
-    <div class="row"><span class="tag">A</span><h2>The Registry</h2></div>
-    <div class="meta">Index/archive direction · grotesque + mono · filterable classification registry · scroll reveals · copy rev 3 (EN) / CARD-2026-006 (ES)</div>
-  </a>
+<!-- HERO -->
+<section>
+  <div class="wrap" style="padding-top:96px;padding-bottom:88px">
+    <div class="idx"><span class="n">01</span><span class="dash"></span>
+      <span lang="en">Customs &amp; trade compliance · MX + US</span>
+      <span lang="es">Aduanas y comercio exterior · MX + US</span>
+    </div>
+    <h1>
+      <span lang="en">Customs, carried by customs people.</span>
+      <span lang="es">Aduanas, llevadas por gente de aduanas.</span>
+    </h1>
+    <div class="g2">
+      <div class="body" style="font-size:19px;line-height:1.6;gap:20px">
+        <p><span lang="en">Trade Focus is a customs practice working both sides of the Mexico–United States border: classification, origin, and the compliance work that keeps goods moving and decisions defensible.</span>
+        <span lang="es">Trade Focus es una práctica aduanera que trabaja a ambos lados de la frontera México–Estados Unidos: clasificación, origen, y el trabajo de cumplimiento que mantiene la mercancía en movimiento y las decisiones defendibles.</span></p>
+        <p class="strong"><span lang="en">Different legislation on each side. The same obligation to be right, and to prove it.</span>
+        <span lang="es">Distinta legislación en cada lado. La misma obligación de acertar, y de poder demostrarlo.</span></p>
+        <div style="margin-top:16px;display:flex;gap:14px;flex-wrap:wrap">
+          <a class="btn" href="#contact"><span lang="en">Talk to us</span><span lang="es">Hablemos</span></a>
+          <a class="btn ghost" href="keel/"><span lang="en">Meet KEEL →</span><span lang="es">Conoce KEEL →</span></a>
+        </div>
+      </div>
+      <svg viewBox="0 0 480 300" style="width:100%;height:auto" aria-hidden="true">
+        <line x1="0" y1="150" x2="480" y2="150" stroke="#1A1A14" stroke-width="1"/>
+        <line x1="240" y1="30" x2="240" y2="270" stroke="#E0E0D0" stroke-width="1" stroke-dasharray="3 4"/>
+        <circle cx="240" cy="150" r="6" fill="#FF4D00"/>
+        <text x="8" y="136" font-family="IBM Plex Mono" font-size="12" fill="#6B6B5E">MX</text>
+        <text x="452" y="136" font-family="IBM Plex Mono" font-size="12" fill="#6B6B5E">US</text>
+        <text x="240" y="290" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#B0B0A0" lang="en">one practice, both sides</text>
+        <text x="240" y="290" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#B0B0A0" lang="es">una práctica, ambos lados</text>
+      </svg>
+    </div>
+  </div>
+</section>
 
-  <a class="entry" href="v2/">
-    <div class="row"><span class="tag">B</span><h2>The Position</h2></div>
-    <div class="meta">Legal-opinion direction · serif reasoning, codes never the hero · exposure simulator · static registry, inverted · four movements, tonal cut · copy rev 7 (EN/ES)</div>
-  </a>
+<!-- SERVICES (draft copy — founder review) -->
+<section id="services" class="alt">
+  <div class="wrap sec">
+    <div class="idx"><span class="n">02</span><span class="dash"></span>
+      <span lang="en">What we do</span><span lang="es">Qué hacemos</span>
+    </div>
+    <h2>
+      <span lang="en">The work that has to hold up later.</span>
+      <span lang="es">El trabajo que tiene que sostenerse después.</span>
+    </h2>
+    <div class="cards">
+      <div class="card">
+        <div class="kicker"><span lang="en">Classification</span><span lang="es">Clasificación</span></div>
+        <span class="lead"><span lang="en">Tariff classification, MX + US</span><span lang="es">Clasificación arancelaria, MX + US</span></span>
+        <span lang="en">HTS and LIGIE/NICO determinations with the reasoning and support they will need years from now.</span>
+        <span lang="es">Determinaciones HTS y LIGIE/NICO con el criterio y el soporte que van a necesitar años después.</span>
+      </div>
+      <div class="card">
+        <div class="kicker"><span lang="en">Origin</span><span lang="es">Origen</span></div>
+        <span class="lead"><span lang="en">Origin &amp; trade agreements</span><span lang="es">Origen y tratados</span></span>
+        <span lang="en">Origin determinations and qualification under trade agreements, documented so they can be defended.</span>
+        <span lang="es">Determinaciones de origen y calificación bajo tratados, documentadas para poder defenderse.</span>
+      </div>
+      <div class="card">
+        <div class="kicker"><span lang="en">Compliance</span><span lang="es">Cumplimiento</span></div>
+        <span class="lead"><span lang="en">Reviews &amp; authority response</span><span lang="es">Revisiones y respuesta a la autoridad</span></span>
+        <span lang="en">When the authority asks about a past period, the answer is a file, not a reconstruction. We help you build both.</span>
+        <span lang="es">Cuando la autoridad pregunta por un periodo pasado, la respuesta es un expediente, no una reconstrucción. Ayudamos a construir ambos.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEEL -->
+<section>
+  <div class="wrap sec">
+    <div class="idx"><span class="n">03</span><span class="dash"></span>
+      <span lang="en">Product</span><span lang="es">Producto</span>
+    </div>
+    <div class="keel-band">
+      <div>
+        <div class="mark">KEEL</div>
+        <div class="line">
+          <span lang="en">The record your classifications never had.</span>
+          <span lang="es">El registro que tus clasificaciones nunca tuvieron.</span>
+        </div>
+        <div class="sub">
+          <span lang="en">Our classification management platform: every determination kept as a position the company holds — the call, the reasoning, the support, and everything that touches it after.</span>
+          <span lang="es">Nuestra plataforma de gestión de clasificaciones: cada determinación guardada como una posición que sostiene la empresa — la decisión, el criterio, el soporte, y todo lo que la toca después.</span>
+        </div>
+      </div>
+      <a class="btn" href="keel/"><span lang="en">Meet KEEL →</span><span lang="es">Conoce KEEL →</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="alt">
+  <div class="wrap sec">
+    <div class="idx"><span class="n">04</span><span class="dash"></span>
+      <span lang="en">Contact</span><span lang="es">Contacto</span>
+    </div>
+    <h2>
+      <span lang="en">Tell us what you're carrying.</span>
+      <span lang="es">Cuéntanos qué estás cargando.</span>
+    </h2>
+    <form class="contact-card" id="contactForm" method="POST" novalidate>
+      <div class="cgrid">
+        <div class="cfield">
+          <label for="cfName"><span lang="en">Name</span><span lang="es">Nombre</span></label>
+          <input id="cfName" name="name" autocomplete="name" required>
+        </div>
+        <div class="cfield">
+          <label for="cfEmail"><span lang="en">Work email</span><span lang="es">Correo de trabajo</span></label>
+          <input id="cfEmail" name="email" type="email" autocomplete="email" required>
+        </div>
+      </div>
+      <div class="cfield">
+        <label for="cfCompany"><span lang="en">Company</span><span lang="es">Empresa</span></label>
+        <input id="cfCompany" name="company" autocomplete="organization">
+      </div>
+      <div class="cfield">
+        <label for="cfMsg"><span lang="en">Message</span><span lang="es">Mensaje</span></label>
+        <textarea id="cfMsg" name="message" rows="4"></textarea>
+      </div>
+      <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
+      <input type="hidden" name="_subject" value="Trade Focus — contact">
+      <button type="submit" class="btn">
+        <span lang="en">Send</span><span lang="es">Enviar</span>
+      </button>
+      <p class="form-note" id="formNote"></p>
+    </form>
+  </div>
+</section>
+
 </main>
 
 <footer>
-  <span>KEEL © 2026</span>
-  <span>HTS classification — MX + US</span>
+  <div class="wrap">
+    <span class="fm">TRADE FOCUS <span>© 2026</span></span>
+    <span><span lang="en">Customs &amp; trade compliance — MX + US</span><span lang="es">Aduanas y comercio exterior — MX + US</span></span>
+    <a href="keel/">KEEL</a>
+  </div>
 </footer>
 
+<script>
+// =============== CONTACT CONFIGURATION ===============
+// FORM_ENDPOINT: where the form POSTs. Zero-backend option: FormSubmit —
+//   "https://formsubmit.co/you@trade-focus.com" (first submission sends a
+//   one-time activation email to that inbox). Formspree endpoints work too.
+const FORM_ENDPOINT = "";
+// =====================================================
+
+const langBtns = document.querySelectorAll('.lang button');
+function setLang(l){
+  document.documentElement.lang = l;
+  langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+  try{ localStorage.setItem('keel-lang', l); }catch(e){}
+}
+langBtns.forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+try{
+  const saved = localStorage.getItem('keel-lang');
+  if(saved === 'es' || saved === 'en') setLang(saved);
+}catch(e){}
+
+const cform = document.getElementById('contactForm');
+const formNote = document.getElementById('formNote');
+if(FORM_ENDPOINT) cform.action = FORM_ENDPOINT;
+cform.addEventListener('submit', e => {
+  if(!FORM_ENDPOINT){
+    e.preventDefault();
+    formNote.textContent = document.documentElement.lang === 'es'
+      ? 'El formulario aún no está conectado.'
+      : 'The form is not connected yet.';
+    formNote.classList.add('show');
+    return;
+  }
+  if(!cform.reportValidity()) e.preventDefault();
+});
+</script>
 </body>
 </html>

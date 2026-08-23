@@ -1,16 +1,30 @@
-# KEEL — Landing concepts
+# Trade Focus / KEEL — site
 
-Two parallel landing-page concepts for KEEL, kept side by side for comparison. No build step, no dependencies.
+Static site, no build step. Final shape: `trade-focus.com` is the Trade Focus main page, `trade-focus.com/keel/` is the KEEL product landing.
 
-| Path | Concept | Copy | Notes |
-|---|---|---|---|
-| `/` | Chooser index | — | Minimal door page linking both versions. |
-| `/v1/` | **A — The Registry** | EN rev 3 (CARD-2026-003) + ES (CARD-2026-006) | Index/archive aesthetic inspired by [zchry.org](https://www.zchry.org/): grotesque + mono, numbered sections, filterable classification registry, scroll reveals. |
-| `/v2/` | **B — The Position** | rev 7 (EN/ES, for build) | Vooma-style design system (`keel-design-system.md`): warm cream + ink + one orange accent, Archivo + IBM Plex Mono, section index rows (01–11), card/chip/pill components, SVG line diagrams, dark inversion at 05, full-orange CTA at 11. Structure and copy stay rev 7: exposure simulator (ghost state, ledger + right-to-left scroll-drawn line, Supported/Reconstructed split), registry table, countdown steps, four-movement nav, EN/ES toggle. |
+| Path | Page | Status |
+|---|---|---|
+| `/` | **Trade Focus** main page | Draft — services copy (section 02) and hero are placeholder drafts pending founder review. |
+| `/keel/` | **KEEL landing** (canonical) | The standing version (concept B, rev 7 copy, Vooma-style design) plus the booking CTA and contact form. |
+| `/concepts/` | Concept archive chooser | Links `/v1/` and `/v2/`. |
+| `/v1/`, `/v2/` | Concept archives | A — The Registry; B — The Position (pre-contact-form snapshot). |
+
+## Contact / booking configuration
+
+Both `/index.html` and `/keel/index.html` have a config block at the top of their `<script>`:
+
+- `BOOKING_URL` (keel only) — a Calendly or Cal.com event link; the CTA button opens it in a new tab. Empty → button scrolls to the form.
+- `FORM_ENDPOINT` — where the contact form POSTs. Zero-backend option: `https://formsubmit.co/<inbox>` (first submission triggers a one-time activation email to that inbox; the `_honey` honeypot field is already in the form). Formspree also works. Empty → the form shows "not connected yet" instead of sending.
 
 ## Deploy
 
-`.github/workflows/pages.yml` deploys the repo root to GitHub Pages on every push to this branch. Live at `https://virgiliorobor.github.io/keel_landing/` once Pages is enabled (Settings → Pages → Source: GitHub Actions).
+`.github/workflows/pages.yml` deploys the repo root to GitHub Pages on every push to this branch. Live at `https://virgiliorobor.github.io/keel_landing/`.
+
+### Pointing trade-focus.com here
+
+1. DNS: apex `trade-focus.com` → GitHub Pages A records (185.199.108.153 / .109. / .110. / .111.) + `www` CNAME to `virgiliorobor.github.io`. The `keel.` and `s3.` subdomains keep pointing at the app server — unaffected.
+2. Repo: add a `CNAME` file at the root containing `trade-focus.com` (or set the custom domain in Settings → Pages, which commits it).
+3. Enforce HTTPS in Settings → Pages once the certificate is issued.
 
 ## v2 build notes (rev 7 §8 compliance)
 
