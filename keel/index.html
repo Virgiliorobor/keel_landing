@@ -180,9 +180,16 @@
   section.dark{background:var(--ink);color:var(--bg)}
   section.dark .idx{color:var(--ink-faint)}
   section.dark h2{color:var(--bg)}
+  .backnote{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
   .steps{display:flex;flex-direction:column;max-width:860px}
   .steps>div{display:grid;grid-template-columns:80px 1fr;gap:32px;padding:24px 0;border-top:1px solid var(--line-dark);align-items:baseline}
   .steps .sn{font-family:var(--mono);font-size:22px;color:var(--accent)}
+  /* the countdown converges: 05 faint, 01 full — the file is built backwards */
+  .steps>div:nth-child(1) .sn{opacity:.35}
+  .steps>div:nth-child(2) .sn{opacity:.5}
+  .steps>div:nth-child(3) .sn{opacity:.65}
+  .steps>div:nth-child(4) .sn{opacity:.82}
+  .steps>div:nth-child(5) .sn{opacity:1}
   .steps p{margin:0;font-size:17px;line-height:1.6;color:var(--text-on-dark)}
   .dark-close{margin-top:48px;max-width:760px;display:flex;flex-direction:column;gap:16px}
   .dark-close .p{font-size:17px;line-height:1.6;color:var(--text-on-dark)}
@@ -562,6 +569,10 @@
       <span lang="en">Then someone asks, and you have two weeks.</span>
       <span lang="es">Entonces alguien pregunta, y tienes dos semanas.</span>
     </h2>
+    <div class="backnote">
+      <span lang="en">The file is built backwards</span>
+      <span lang="es">El expediente se arma al revés</span>
+    </div>
     <div class="steps">
       <div><span class="sn">05</span><p>
         <span lang="en">You search your mail to find out who made the call. The broker, the consultant, or someone here.</span>
