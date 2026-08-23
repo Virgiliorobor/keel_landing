@@ -10,20 +10,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F8FAF0;
-    --bg-2:#F1F4E4;
-    --ink:#1A1A14;
-    --ink-soft:#3A3A30;
-    --ink-muted:#6B6B5E;
-    --ink-faint:#8A8A7A;
-    --accent:#FF4D00;
-    --accent-tint:#FFF3EC;
-    --accent-on-dark-1:#FFE4D6;
-    --accent-on-dark-2:#FFD2BC;
+    --bg:#F9FBFE;
+    --bg-2:#EDF3FA;
+    --ink:#0F1722;
+    --ink-soft:#33404F;
+    --ink-muted:#5F6E7E;
+    --ink-faint:#8595A6;
+    --accent:#0D5EAF;      /* flag blue — structure, buttons, numbers */
+    --sea:#1FA7EA;         /* aegean — the vibrant second blue */
+    --gold:#D9A62E;        /* the rare third note */
+    --keel-orange:#FF4D00; /* KEEL keeps its own color */
+    --accent-tint:#E8F0FB;
+    --accent-on-dark-1:#D6E7FA;
+    --accent-on-dark-2:#B9D6F5;
+    --navy:#0E2740;        /* deep marine, the dark section */
     --card:#FFFFFF;
-    --line:#E0E0D0;
-    --line-dark:#33332B;
-    --text-on-dark:#C9C9B8;
+    --line:#D9E2EC;
+    --line-dark:#23405C;
+    --text-on-dark:#AFC3D6;
     --sans:'Archivo',system-ui,sans-serif;
     --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   }
@@ -40,7 +44,7 @@
   section{border-bottom:1px solid var(--line)}
   .sec{padding:clamp(80px,12vh,130px) 0}
   section.alt{background:var(--bg-2)}
-  section.dark{background:var(--ink);color:var(--bg);border-bottom:none}
+  section.dark{background:var(--navy);color:var(--bg);border-bottom:none}
   section.dark .idx{color:var(--ink-faint)}
 
   .idx{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--ink-muted);margin-bottom:clamp(36px,6vh,56px)}
@@ -55,6 +59,8 @@
   .stack{display:flex;flex-direction:column;gap:clamp(26px,4.5vh,44px)}
   .em-i{font-style:italic}
   .orange{color:var(--accent)}
+  .sea{color:var(--sea)}
+  .gold{color:var(--gold)}
 
   .btn{display:inline-flex;align-items:center;background:var(--accent);color:var(--bg);padding:14px 30px;border-radius:999px;font-size:16px;font-weight:600;border:none;cursor:pointer;font-family:var(--sans)}
   .btn:hover{background:var(--ink);color:var(--bg)}
@@ -62,7 +68,7 @@
   .btn.on-orange{background:var(--ink);color:var(--bg);padding:16px 34px;font-size:17px}
   .btn.on-orange:hover{background:var(--bg);color:var(--accent)}
 
-  nav.top{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(248,250,240,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.top{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(243,247,251,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   nav.top .wrap{height:64px;display:flex;align-items:center;gap:28px}
   .wordmark{font-weight:800;font-size:17px;letter-spacing:.14em}
   .navlinks{display:flex;gap:24px;font-size:14px;font-weight:500;flex:1}
@@ -78,7 +84,7 @@
     font-weight:900;letter-spacing:-.025em;line-height:.86;
     font-size:clamp(88px,19.5vw,330px);text-transform:uppercase;
   }
-  .open .mark .dot{color:var(--accent)}
+  .open .mark .dot{color:var(--gold)}
   .open .under{
     display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
     margin-top:clamp(28px,5vh,48px);padding-top:22px;border-top:1px solid var(--ink);
@@ -89,8 +95,8 @@
   /* ---- dark section accents ---- */
   section.dark .xl{color:var(--bg)}
   section.dark .md{color:var(--text-on-dark)}
-  section.dark .xl.orange,section.orange .xl.orange{color:var(--accent)}
-  section.orange .xl.orange{color:var(--ink)}
+  section.dark .xl.sea{color:var(--sea)}
+  section.dark .sign{color:var(--gold)}
 
   /* ---- founder sign ---- */
   .sign{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-top:26px}
@@ -100,7 +106,7 @@
   .dev:last-of-type{border-bottom:1px solid var(--ink)}
   .dev .tag{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px;padding-top:10px}
   .dev .tag i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
-  .dev .tag.live{color:var(--accent)}
+  .dev .tag.live{color:var(--keel-orange)}
   .dev .tag.wip{color:var(--ink-muted)}
   .dev .tag.wip i{background:transparent;border:1px solid currentColor}
   .dev h3{font-size:clamp(30px,4.2vw,56px);font-weight:800;letter-spacing:-.025em;line-height:1.05;margin-bottom:14px}
@@ -191,8 +197,8 @@
         <span lang="es">La gente de aduanas trabaja duro, y optimiza recursos mejor que nadie a su alrededor.</span>
       </div>
       <div class="md rise">
-        <span lang="en">That makes them some of the most capable people in their organizations.</span>
-        <span lang="es">Eso los convierte en algunas de las personas más capaces de sus organizaciones.</span>
+        <span lang="en">That makes them some of <span class="sea">the most capable people</span> in their organizations.</span>
+        <span lang="es">Eso los convierte en algunas de <span class="sea">las personas más capaces</span> de sus organizaciones.</span>
       </div>
     </div>
   </div>
@@ -204,16 +210,16 @@
     <div class="idx"><span class="n">02</span><span class="dash"></span></div>
     <div class="stack">
       <div class="lg rise">
-        <span lang="en">They speak <span class="em-i">engineering</span>, so they understand the specs, the components, the parts, and what each one does.</span>
-        <span lang="es">Hablan <span class="em-i">ingeniería</span>: entienden las fichas técnicas, los componentes, las partes, y lo que hace cada una.</span>
+        <span lang="en">They speak <span class="em-i orange">engineering</span>, so they understand the specs, the components, the parts, and what each one does.</span>
+        <span lang="es">Hablan <span class="em-i orange">ingeniería</span>: entienden las fichas técnicas, los componentes, las partes, y lo que hace cada una.</span>
       </div>
       <div class="lg rise">
-        <span lang="en">They speak <span class="em-i">finance</span>, because duties land in the budget.</span>
-        <span lang="es">Hablan <span class="em-i">finanzas</span>, porque los aranceles caen en el presupuesto.</span>
+        <span lang="en">They speak <span class="em-i gold">finance</span>, because duties land in the budget.</span>
+        <span lang="es">Hablan <span class="em-i gold">finanzas</span>, porque los aranceles caen en el presupuesto.</span>
       </div>
       <div class="lg rise">
-        <span lang="en">They speak <span class="em-i">C-suite</span>, because a classification can change the business strategy.</span>
-        <span lang="es">Hablan <span class="em-i">con la dirección</span>, porque una clasificación puede cambiar la estrategia del negocio.</span>
+        <span lang="en">They speak <span class="em-i sea">C-suite</span>, because a classification can change the business strategy.</span>
+        <span lang="es">Hablan <span class="em-i sea">con la dirección</span>, porque una clasificación puede cambiar la estrategia del negocio.</span>
       </div>
     </div>
   </div>
@@ -245,7 +251,7 @@
         <span lang="en">And the software does not help them.</span>
         <span lang="es">Y el software no los ayuda.</span>
       </div>
-      <div class="xl rise orange" style="max-width:22ch">
+      <div class="xl rise sea" style="max-width:22ch">
         <span lang="en">Most of the time it works against them.</span>
         <span lang="es">La mayor parte del tiempo trabaja en su contra.</span>
       </div>
@@ -257,7 +263,7 @@
 <section>
   <div class="wrap sec">
     <div class="idx"><span class="n">05</span><span class="dash"></span></div>
-    <div class="lg rise" style="max-width:34ch;border-left:3px solid var(--accent);padding-left:clamp(18px,3vw,32px);font-weight:600">
+    <div class="lg rise" style="max-width:34ch;border-left:3px solid var(--gold);padding-left:clamp(18px,3vw,32px);font-weight:600">
       <span lang="en">Twenty years of customs and foreign trade consultancy is where I learned this, and it is why I built Trade Focus.</span>
       <span lang="es">Veinte años de consultoría en aduanas y comercio exterior es donde lo aprendí, y es la razón por la que construí Trade Focus.</span>
     </div>
@@ -275,8 +281,8 @@
         <span lang="es">Trade Focus construye herramientas para especialistas de aduanas, herramientas que de verdad los ayudan.</span>
       </div>
       <div class="lg rise">
-        <span lang="en">Through <span class="orange">augmentation</span>, not automation.</span>
-        <span lang="es">Con <span class="orange">aumento</span>, no automatización.</span>
+        <span lang="en">Through <span class="sea">augmentation</span>, not automation.</span>
+        <span lang="es">Con <span class="sea">aumento</span>, no automatización.</span>
       </div>
       <div class="lg rise">
         <span lang="en">Acknowledging that the decision stays with the specialist.</span>
@@ -295,7 +301,7 @@
         <span lang="en">The searching, the reconstructing, the chasing, the remembering:</span>
         <span lang="es">Buscar, reconstruir, perseguir, recordar:</span>
       </div>
-      <div class="xl rise orange" style="max-width:24ch">
+      <div class="xl rise sea" style="max-width:24ch">
         <span lang="en">that is the part the software should be carrying.</span>
         <span lang="es">esa es la parte que el software debería estar cargando.</span>
       </div>
@@ -308,9 +314,9 @@
   <div class="wrap sec">
     <div class="idx"><span class="n">08</span><span class="dash"></span></div>
     <div class="stack" style="gap:clamp(10px,2vh,20px)">
-      <div class="xl rise"><span lang="en">Better tools.</span><span lang="es">Mejores herramientas.</span></div>
-      <div class="xl rise"><span lang="en">Better organization.</span><span lang="es">Mejor organización.</span></div>
-      <div class="xl rise orange"><span lang="en">Equals certainty.</span><span lang="es">Igual a certeza.</span></div>
+      <div class="xl rise orange"><span lang="en">Better tools.</span><span lang="es">Mejores herramientas.</span></div>
+      <div class="xl rise sea"><span lang="en">Better organization.</span><span lang="es">Mejor organización.</span></div>
+      <div class="xl rise gold"><span lang="en">Equals certainty.</span><span lang="es">Igual a certeza.</span></div>
     </div>
   </div>
 </section>

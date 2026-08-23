@@ -22,7 +22,7 @@ Both `/index.html` and `/keel/index.html` have a config block at the top of thei
 
 **Staging**: `.github/workflows/pages.yml` deploys the repo root to GitHub Pages on every push to this branch — `https://virgiliorobor.github.io/keel_landing/` — for review only.
 
-The Trade Focus page design follows mosey.com's language (warm paper, deep green, pastel cards, pill buttons, big footer); the ES manifesto is a localization pending founder review.
+The Trade Focus page is a typographic manifesto in a Greek-nautical palette: flag blue #0D5EAF (structure), Aegean #1FA7EA (vibrant second accent), gold #D9A62E (rare third note) on near-white blue-tinted paper, with the dark section in marine navy. KEEL keeps its orange identity. The ES manifesto is a localization pending founder review.
 
 ## v2 build notes (rev 7 §8 compliance)
 
