@@ -1,55 +1,67 @@
 # Deploying trade-focus.com
 
-Production site = two static pages, no build step:
+Self-contained repo, deployed separately from the KEEL portal. Two containers:
 
-| URL | File |
+| Service | What | Files |
+|---|---|---|
+| `web` | nginx serving the two pages, proxying `/api/contact` to the receiver | `Dockerfile`, `nginx.conf`, `index.html`, `keel/index.html` |
+| `contact` | contact-form receiver → SMTP. Single-file Python, standard library only — no dependencies to patch | `Dockerfile.contact`, `contact/server.py` |
+
+| URL | Serves |
 |---|---|
-| `trade-focus.com/` | `index.html` (Trade Focus manifesto) |
-| `trade-focus.com/keel/` | `keel/index.html` (KEEL landing) |
+| `trade-focus.com/` | Trade Focus manifesto |
+| `trade-focus.com/keel/` | KEEL landing |
+| `trade-focus.com/api/contact` | form receiver (same-origin — no CORS involved) |
 
-The concept archives (`/concepts`, `/v1`, `/v2`) are intentionally **not** deployed — they exist only in the repo and on the GitHub Pages staging URL.
+The concept archives (`/concepts`, `/v1`, `/v2`) are **not** deployed; they exist only in the repo and on the GitHub Pages staging URL.
 
-## Before going live
+## Option A — Coolify (recommended)
 
-**Contact form — in-house, already wired.** Both forms POST JSON to `https://keel.trade-focus.com/api/public/contact`, a public endpoint in the classmana backend (branch `claude/public-contact-endpoint`, v1.25.0: honeypot, field caps, per-IP rate limit, sends via the existing SMTP relay). To activate it:
+1. **+ New → Docker Compose**, pick this repo/branch (`compose.yaml` at the root).
+2. Attach the domain `https://trade-focus.com` to the **web** service (add `www` if wanted). Coolify's proxy issues TLS automatically.
+3. Set the environment for the **contact** service:
 
-1. Merge that branch and redeploy the KEEL backend.
-2. In the backend's environment (Coolify): set `CONTACT_EMAIL=<inbox that receives leads>` and add `https://trade-focus.com` (and `https://www.trade-focus.com` if used) to `CORS_ORIGINS`.
-3. Until then, submissions get a clean "Could not send" note — nothing is lost silently, and the endpoint answers 503 if `CONTACT_EMAIL` is unset so misconfiguration is visible.
+   | Var | Value |
+   |---|---|
+   | `CONTACT_EMAIL` | inbox that receives leads (**required** — unset ⇒ endpoint answers 503) |
+   | `SMTP_HOST` / `SMTP_PORT` | your relay (e.g. Brevo, same values the portal uses), default port 587 |
+   | `SMTP_USERNAME` / `SMTP_PASSWORD` | relay credentials |
+   | `SMTP_STARTTLS` | `1` (default) for authenticated relays on 587 |
+   | `SMTP_FROM` | default `Trade Focus <no-reply@trade-focus.com>` |
 
-**Booking (still pending):** `BOOKING_URL` in `keel/index.html` — a Calendly or Cal.com event link. When set, the KEEL CTA opens it in a new tab; while empty, the CTA scrolls to the contact form, which works fine as the interim path.
+4. DNS: `A` record for `trade-focus.com` (and `www`) → the server IP. `keel.` and `s3.` are untouched.
+5. Deploy. Enable the webhook if you want auto-deploy on push.
 
-## Option A — Coolify (recommended, same box as the KEEL portal)
+## Option B — plain Caddy + docker
 
-1. Coolify → **+ New → Application → Public/Private repository**, pick this repo and branch.
-2. Build pack: **Dockerfile** (it's at the repo root; copies only the two production pages into nginx:alpine, port 80).
-3. Domain: `https://trade-focus.com` (add `https://www.trade-focus.com` too if you want the `www`).
-4. DNS: `A` record for `trade-focus.com` (and `www`) → the server's IP. `keel.` and `s3.` records are untouched.
-5. Deploy. Coolify's proxy handles TLS certificates automatically, exactly like it does for `keel.trade-focus.com`.
-
-Every future `git push` to the configured branch can auto-deploy if you enable the webhook in Coolify.
-
-## Option B — plain Caddy static
-
-Copy the two pages to the server and add a site block:
-
-```bash
-rsync -av index.html keel user@server:/srv/trade-focus/
-```
+Run the two containers with `docker compose up -d` (same env), then:
 
 ```caddy
 trade-focus.com {
-    root * /srv/trade-focus
-    file_server
     encode gzip
+    handle /api/contact {
+        reverse_proxy contact:8080
+    }
+    handle {
+        reverse_proxy web:80
+    }
 }
 ```
 
-Same DNS record as above; Caddy issues the certificate on first request.
+## The receiver, in brief (`contact/server.py`)
 
-## Smoke test after deploy
+- `POST /contact` (or `/api/contact`) with JSON `{name, email, company?, message?, _subject?, _honey?}`.
+- Honeypot `_honey` filled → fake success, nothing sent. Field caps (name/company 200, message 4000), 16 KB body cap, per-IP rate limit (5/hour, in-memory).
+- Sends plain text to `CONTACT_EMAIL` via SMTP; `GET /health` for monitoring.
+- `ALLOWED_ORIGINS` env exists for running it on a separate host, but the default same-origin proxy setup needs no CORS at all.
 
-- `https://trade-focus.com/` loads the manifesto; EN/ES toggle persists across pages.
-- `https://trade-focus.com/keel/` loads KEEL; the header wordmark links back to `/`.
-- Submit the contact form once to trigger the FormSubmit activation email (if using FormSubmit), then click the activation link in the inbox.
-- The KEEL CTA opens the booking link in a new tab (if configured).
+## Still pending before go-live
+
+- `BOOKING_URL` in `keel/index.html` — Calendly/Cal.com event link for the walkthrough CTA. While empty, the CTA scrolls to the (working) contact form.
+- Founder review: ES manifesto localization; the withdrawal note on the KEEL simulator (rev 7 §4 flag).
+
+## Smoke test
+
+- `/` and `/keel/` load; EN/ES persists across pages; wordmark links back to `/`.
+- `curl https://trade-focus.com/api/contact -X POST -H 'Content-Type: application/json' -d '{"name":"Test","email":"you@example.com","message":"smoke"}'` → `{"ok": true}` and the mail lands in `CONTACT_EMAIL`.
+- Submit the real form once from the page; button shows Sending… → Sent.

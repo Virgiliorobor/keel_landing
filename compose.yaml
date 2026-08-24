@@ -1,0 +1,21 @@
+# trade-focus.com — static site + contact receiver, deployed together.
+# Coolify: add as a Docker Compose resource; attach the domain to `web`.
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - contact
+  contact:
+    build:
+      context: .
+      dockerfile: Dockerfile.contact
+    environment:
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-1}
+      SMTP_FROM: ${SMTP_FROM:-Trade Focus <no-reply@trade-focus.com>}

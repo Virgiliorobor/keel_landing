@@ -1,0 +1,6 @@
+# Trade Focus contact receiver — stdlib only, nothing to pip install.
+FROM python:3.12-alpine
+COPY contact/server.py /srv/server.py
+USER nobody
+EXPOSE 8080
+CMD ["python", "/srv/server.py"]

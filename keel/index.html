@@ -862,10 +862,9 @@
 // When set, the CTA button opens it in a new tab. When empty, the button
 // scrolls to the contact form instead.
 const BOOKING_URL = "";
-// FORM_ENDPOINT: the KEEL portal's public contact endpoint (in-house,
-// branch claude/public-contact-endpoint in the classmana repo). Requires
-// CONTACT_EMAIL set and trade-focus.com in CORS_ORIGINS on that deployment.
-const FORM_ENDPOINT = "https://keel.trade-focus.com/api/public/contact";
+// FORM_ENDPOINT: the site's own contact receiver (contact/server.py in
+// this repo, proxied by nginx at /api/contact — same-origin, no CORS).
+const FORM_ENDPOINT = "/api/contact";
 // =====================================================
 
 // ---- language toggle (shared key with v1) ----
