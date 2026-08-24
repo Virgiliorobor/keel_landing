@@ -862,11 +862,10 @@
 // When set, the CTA button opens it in a new tab. When empty, the button
 // scrolls to the contact form instead.
 const BOOKING_URL = "";
-// FORM_ENDPOINT: where the form POSTs. Zero-backend option: FormSubmit —
-//   "https://formsubmit.co/you@trade-focus.com" (first submission sends a
-//   one-time activation email to that inbox). Formspree endpoints work too.
-// When empty, submitting shows a "not connected yet" note instead of sending.
-const FORM_ENDPOINT = "";
+// FORM_ENDPOINT: the KEEL portal's public contact endpoint (in-house,
+// branch claude/public-contact-endpoint in the classmana repo). Requires
+// CONTACT_EMAIL set and trade-focus.com in CORS_ORIGINS on that deployment.
+const FORM_ENDPOINT = "https://keel.trade-focus.com/api/public/contact";
 // =====================================================
 
 // ---- language toggle (shared key with v1) ----
@@ -1118,17 +1117,37 @@ if(BOOKING_URL){
 }
 const cform = document.getElementById('contactForm');
 const formNote = document.getElementById('formNote');
-if(FORM_ENDPOINT) cform.action = FORM_ENDPOINT;
-cform.addEventListener('submit', e => {
-  if(!FORM_ENDPOINT){
-    e.preventDefault();
-    formNote.textContent = document.documentElement.lang === 'es'
-      ? 'El formulario aún no está conectado.'
-      : 'The form is not connected yet.';
-    formNote.classList.add('show');
-    return;
+const FORM_NOTES = {
+  sending: {en: 'Sending…', es: 'Enviando…'},
+  sent: {en: "Sent. We'll get back to you soon.", es: 'Enviado. Te contactamos pronto.'},
+  error: {en: 'Could not send. Please try again.', es: 'No se pudo enviar. Inténtalo de nuevo.'},
+  off: {en: 'The form is not connected yet.', es: 'El formulario aún no está conectado.'}
+};
+function formSay(k){
+  formNote.textContent = FORM_NOTES[k][document.documentElement.lang === 'es' ? 'es' : 'en'];
+  formNote.classList.add('show');
+}
+cform.addEventListener('submit', async e => {
+  e.preventDefault();
+  if(!FORM_ENDPOINT){ formSay('off'); return; }
+  if(!cform.reportValidity()) return;
+  const btn = cform.querySelector('button[type=submit]');
+  btn.disabled = true;
+  formSay('sending');
+  try{
+    const r = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(Object.fromEntries(new FormData(cform).entries()))
+    });
+    if(!r.ok) throw new Error('send failed');
+    cform.reset();
+    formSay('sent');
+  }catch(err){
+    formSay('error');
+  }finally{
+    btn.disabled = false;
   }
-  if(!cform.reportValidity()) e.preventDefault();
 });
 
 window.__simReady = true;

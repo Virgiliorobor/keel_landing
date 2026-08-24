@@ -9,13 +9,15 @@ Production site = two static pages, no build step:
 
 The concept archives (`/concepts`, `/v1`, `/v2`) are intentionally **not** deployed — they exist only in the repo and on the GitHub Pages staging URL.
 
-## Before going live — 2 config values
+## Before going live
 
-Both pages have a config block at the top of their `<script>` tag:
+**Contact form — in-house, already wired.** Both forms POST JSON to `https://keel.trade-focus.com/api/public/contact`, a public endpoint in the classmana backend (branch `claude/public-contact-endpoint`, v1.25.0: honeypot, field caps, per-IP rate limit, sends via the existing SMTP relay). To activate it:
 
-1. `FORM_ENDPOINT` (both pages) — where the contact form POSTs.
-   Zero-backend option: `https://formsubmit.co/<your-inbox>` — no account needed; the first submission emails that inbox a one-time activation link. A honeypot field is already in the form.
-2. `BOOKING_URL` (`keel/index.html` only) — a Calendly or Cal.com event link. When set, the CTA opens it in a new tab; when empty, the CTA scrolls to the form.
+1. Merge that branch and redeploy the KEEL backend.
+2. In the backend's environment (Coolify): set `CONTACT_EMAIL=<inbox that receives leads>` and add `https://trade-focus.com` (and `https://www.trade-focus.com` if used) to `CORS_ORIGINS`.
+3. Until then, submissions get a clean "Could not send" note — nothing is lost silently, and the endpoint answers 503 if `CONTACT_EMAIL` is unset so misconfiguration is visible.
+
+**Booking (still pending):** `BOOKING_URL` in `keel/index.html` — a Calendly or Cal.com event link. When set, the KEEL CTA opens it in a new tab; while empty, the CTA scrolls to the contact form, which works fine as the interim path.
 
 ## Option A — Coolify (recommended, same box as the KEEL portal)
 
