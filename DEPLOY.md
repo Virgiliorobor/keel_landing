@@ -55,9 +55,12 @@ trade-focus.com {
 - Sends plain text to `CONTACT_EMAIL` via SMTP; `GET /health` for monitoring.
 - `ALLOWED_ORIGINS` env exists for running it on a separate host, but the default same-origin proxy setup needs no CORS at all.
 
+## Booking
+
+No third-party scheduler. The KEEL contact card has a local calendar widget (weekdays, 2-day lead, ~6 weeks out, three curated windows per day in Mexico City time with the visitor's local time shown). The chosen slot is a REQUEST — it rides inside the contact message ("Requested walkthrough slot: …") and the real invite goes out manually by email (Thunderbird sends .ics invites natively). Slot hours are the `SLOT_HOURS` array at the top of `keel/index.html`'s script.
+
 ## Still pending before go-live
 
-- `BOOKING_URL` in `keel/index.html` — Calendly/Cal.com event link for the walkthrough CTA. While empty, the CTA scrolls to the (working) contact form.
 - Founder review: ES manifesto localization; the withdrawal note on the KEEL simulator (rev 7 §4 flag).
 
 ## Smoke test

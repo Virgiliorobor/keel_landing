@@ -251,6 +251,28 @@
   section.orange .body{color:var(--accent-on-dark-1)}
   .sig{font-size:20px;font-weight:600;color:var(--bg)}
 
+  /* booking widget — local, no third-party requests */
+  .bookgrid{display:grid;grid-template-columns:auto 1fr;gap:24px;margin-bottom:20px;align-items:start}
+  .cal{width:272px;max-width:100%}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .cal-head .mname{font-size:14px;font-weight:600;text-transform:capitalize}
+  .cal-head button{background:none;border:1px solid var(--line);border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1}
+  .cal-head button:disabled{opacity:.3;cursor:default}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .cal-grid .dow{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--ink-faint);text-align:center;padding:4px 0}
+  .cal-grid button{
+    aspect-ratio:1;border:none;background:none;border-radius:8px;font-size:13px;
+    color:var(--ink);cursor:pointer;font-family:var(--sans);
+  }
+  .cal-grid button:hover:not(:disabled){background:var(--accent-tint)}
+  .cal-grid button:disabled{color:var(--line);cursor:default}
+  .cal-grid button.sel{background:var(--accent);color:#fff;font-weight:600}
+  .slots-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted);margin-bottom:10px}
+  .slots .chips button{font-variant-numeric:tabular-nums}
+  .slot-note{font-family:var(--mono);font-size:12px;color:var(--ink-muted);margin-top:12px;line-height:1.6}
+  .slot-note b{color:var(--accent);font-weight:500}
+  @media(max-width:640px){.bookgrid{grid-template-columns:1fr}}
+
   /* contact form (white card on the orange CTA section) */
   .contact-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;margin-top:56px;max-width:720px;color:var(--ink)}
   .contact-card .ctitle{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted);margin-bottom:18px}
@@ -827,8 +849,26 @@
 
     <form class="contact-card" id="contactForm" method="POST" novalidate>
       <div class="ctitle">
-        <span lang="en">Or leave your details and we'll reach out</span>
-        <span lang="es">O déjanos tus datos y te contactamos</span>
+        <span lang="en">Pick a time and leave your details — we confirm by email</span>
+        <span lang="es">Elige un horario y déjanos tus datos — confirmamos por correo</span>
+      </div>
+      <div class="bookgrid">
+        <div class="cal">
+          <div class="cal-head">
+            <button type="button" id="calPrev" aria-label="Previous month">‹</button>
+            <span class="mname" id="calMonth"></span>
+            <button type="button" id="calNext" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <div class="slots">
+          <div class="slots-label" id="slotsLabel">
+            <span lang="en">Available windows</span>
+            <span lang="es">Horarios disponibles</span>
+          </div>
+          <div class="chips" id="slotChips"></div>
+          <div class="slot-note" id="slotNote"></div>
+        </div>
       </div>
       <div class="cgrid">
         <div class="cfield">
@@ -871,14 +911,14 @@
 
 <script>
 // =============== CONTACT CONFIGURATION ===============
-// BOOKING_URL: a scheduling link (Calendly or Cal.com event), e.g.
-//   "https://calendly.com/yourname/keel-walkthrough" or "https://cal.com/yourname/keel"
-// When set, the CTA button opens it in a new tab. When empty, the button
-// scrolls to the contact form instead.
-const BOOKING_URL = "";
 // FORM_ENDPOINT: the site's own contact receiver (contact/server.py in
 // this repo, proxied by nginx at /api/contact — same-origin, no CORS).
 const FORM_ENDPOINT = "/api/contact";
+// Walkthrough windows, hours in Mexico City time (fixed UTC-6).
+// 11.5 means 11:30. Three of these are offered per weekday.
+const SLOT_HOURS = [10, 11.5, 13, 17];
+const LEAD_DAYS = 2;      // earliest bookable day: today + 2
+const RANGE_DAYS = 45;    // furthest bookable day
 // =====================================================
 
 // ---- language toggle (shared key with v1) ----
@@ -888,6 +928,7 @@ function setLang(l){
   langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === l));
   try{ localStorage.setItem('keel-lang', l); }catch(e){}
   if(window.__simReady) simRender();
+  if(window.__calReady){ renderCal(); renderSlots(); }
 }
 langBtns.forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
 try{
@@ -1121,13 +1162,118 @@ valInput.addEventListener('blur', () => {
   else valInput.value = '100,000';
 });
 
-// ---- booking + contact form ----
-const bookBtn = document.getElementById('bookBtn');
-if(BOOKING_URL){
-  bookBtn.href = BOOKING_URL;
-  bookBtn.target = '_blank';
-  bookBtn.rel = 'noopener';
+// ---- booking widget: local calendar, no third-party requests ----
+// The visitor requests a window; nothing is auto-confirmed — the slot rides
+// inside the contact message and the real invite goes out by email.
+const CDMX_OFFSET = 6; // Mexico City is fixed UTC-6 (no DST since 2022)
+const calGrid = document.getElementById('calGrid');
+const calMonth = document.getElementById('calMonth');
+const slotChips = document.getElementById('slotChips');
+const slotNote = document.getElementById('slotNote');
+let calBase = new Date(); calBase.setDate(1);
+let calOffset = 0;             // months from calBase being displayed
+let selYmd = null;             // 'YYYY-MM-DD'
+let selSlot = null;            // index into day's slots
+let selUtcMs = null;
+
+function locale(){ return document.documentElement.lang === 'es' ? 'es-MX' : 'en-US'; }
+function ymd(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function slotLabel(h){
+  const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+  return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
 }
+function daySlots(d){
+  // three curated windows per weekday; which one is withheld varies by day
+  const drop = (d.getDate() + d.getMonth()) % SLOT_HOURS.length;
+  return SLOT_HOURS.filter((_, i) => i !== drop);
+}
+function selectable(d){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const min = new Date(today); min.setDate(min.getDate() + LEAD_DAYS);
+  const max = new Date(today); max.setDate(max.getDate() + RANGE_DAYS);
+  const dow = d.getDay();
+  return dow >= 1 && dow <= 5 && d >= min && d <= max;
+}
+function renderCal(){
+  const view = new Date(calBase.getFullYear(), calBase.getMonth() + calOffset, 1);
+  calMonth.textContent = view.toLocaleDateString(locale(), { month: 'long', year: 'numeric' });
+  document.getElementById('calPrev').disabled = calOffset <= 0;
+  document.getElementById('calNext').disabled = calOffset >= 2;
+  calGrid.innerHTML = '';
+  const dowBase = new Date(2026, 0, 5); // a Monday
+  for(let i = 0; i < 7; i++){
+    const c = document.createElement('span'); c.className = 'dow';
+    const dd = new Date(dowBase); dd.setDate(dowBase.getDate() + i);
+    c.textContent = dd.toLocaleDateString(locale(), { weekday: 'narrow' });
+    calGrid.appendChild(c);
+  }
+  const firstDow = (view.getDay() + 6) % 7; // Monday-first
+  for(let i = 0; i < firstDow; i++) calGrid.appendChild(document.createElement('span'));
+  const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+  for(let day = 1; day <= days; day++){
+    const d = new Date(view.getFullYear(), view.getMonth(), day);
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = day;
+    b.disabled = !selectable(d);
+    if(ymd(d) === selYmd) b.classList.add('sel');
+    b.addEventListener('click', () => { selYmd = ymd(d); selSlot = null; selUtcMs = null; renderCal(); renderSlots(); });
+    calGrid.appendChild(b);
+  }
+}
+function renderSlots(){
+  slotChips.innerHTML = '';
+  slotNote.textContent = '';
+  if(!selYmd){
+    slotNote.textContent = document.documentElement.lang === 'es' ? 'Elige un día.' : 'Pick a day.';
+    return;
+  }
+  const [y, m, day] = selYmd.split('-').map(Number);
+  const d = new Date(y, m - 1, day);
+  daySlots(d).forEach((h, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = slotLabel(h) + ' CDMX';
+    if(i === selSlot) b.classList.add('on');
+    b.addEventListener('click', () => {
+      selSlot = i;
+      const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+      selUtcMs = Date.UTC(y, m - 1, day, hh + CDMX_OFFSET, mm);
+      renderSlots();
+    });
+    slotChips.appendChild(b);
+  });
+  if(selSlot !== null && selUtcMs !== null){
+    const es = document.documentElement.lang === 'es';
+    const when = new Date(selUtcMs);
+    const dateStr = d.toLocaleDateString(locale(), { weekday: 'long', month: 'long', day: 'numeric' });
+    const localStr = when.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
+    const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace('_', ' ');
+    let note = '<b>' + dateStr + ' · ' + slotLabel(daySlots(d)[selSlot]) + '</b> ' + (es ? 'hora de Ciudad de México' : 'Mexico City time');
+    if(tz && tz !== 'Mexico City'){
+      note += '<br>' + (es ? 'Tu hora: ' : 'Your time: ') + localStr + (tz ? ' (' + tz + ')' : '');
+    }
+    note += '<br>' + (es ? 'Se confirma por correo.' : 'Confirmed by email.');
+    slotNote.innerHTML = note;
+  } else {
+    slotNote.textContent = document.documentElement.lang === 'es' ? 'Elige un horario.' : 'Pick a window.';
+  }
+}
+document.getElementById('calPrev').addEventListener('click', () => { calOffset--; renderCal(); });
+document.getElementById('calNext').addEventListener('click', () => { calOffset++; renderCal(); });
+function slotSummary(){
+  if(selSlot === null || !selYmd) return '';
+  const [y, m, day] = selYmd.split('-').map(Number);
+  const d = new Date(y, m - 1, day);
+  const h = daySlots(d)[selSlot];
+  const local = new Date(selUtcMs).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown tz';
+  return 'Requested walkthrough slot: ' + selYmd + ' ' + slotLabel(h) +
+         ' Mexico City (visitor local: ' + local + ' ' + tz + ')';
+}
+renderCal();
+renderSlots();
+window.__calReady = true;
+
 const cform = document.getElementById('contactForm');
 const formNote = document.getElementById('formNote');
 const FORM_NOTES = {
@@ -1148,10 +1294,13 @@ cform.addEventListener('submit', async e => {
   btn.disabled = true;
   formSay('sending');
   try{
+    const payload = Object.fromEntries(new FormData(cform).entries());
+    const slot = slotSummary();
+    if(slot) payload.message = slot + '\n\n' + (payload.message || '');
     const r = await fetch(FORM_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(Object.fromEntries(new FormData(cform).entries()))
+      body: JSON.stringify(payload)
     });
     if(!r.ok) throw new Error('send failed');
     cform.reset();

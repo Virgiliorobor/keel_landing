@@ -13,7 +13,7 @@ Static site, no build step. Final shape: `trade-focus.com` is the Trade Focus ma
 
 Both `/index.html` and `/keel/index.html` have a config block at the top of their `<script>`:
 
-- `BOOKING_URL` (keel only) — a Calendly or Cal.com event link; the CTA button opens it in a new tab. Empty → button scrolls to the form.
+- Booking is a local calendar widget on the keel page (no third-party scheduler); slot hours live in `SLOT_HOURS` in `keel/index.html`. The picked slot is sent inside the contact message and confirmed manually by email.
 - `FORM_ENDPOINT` — where the contact form POSTs. Zero-backend option: `https://formsubmit.co/<inbox>` (first submission triggers a one-time activation email to that inbox; the `_honey` honeypot field is already in the form). Formspree also works. Empty → the form shows "not connected yet" instead of sending.
 
 ## Deploy
