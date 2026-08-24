@@ -148,6 +148,15 @@
     .dev{grid-template-columns:1fr;gap:14px}
     .dev .tag{padding-top:0}
   }
+  @media(max-width:600px){
+    .wrap{padding:0 20px}
+    nav.top .wrap{gap:10px;padding:0 16px}
+    .wordmark{font-size:14px;letter-spacing:.08em}
+    .lang button{padding:5px 10px}
+    nav.top .btn.small{padding:8px 13px;font-size:13px;margin-left:auto}
+    .open .mark{font-size:clamp(64px,21vw,330px)}
+    .contact-card{padding:20px}
+  }
   @media(max-width:560px){.cgrid{grid-template-columns:1fr}}
   @media(prefers-reduced-motion:reduce){
     .rise{opacity:1;transform:none;transition:none}
