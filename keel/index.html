@@ -1295,8 +1295,14 @@ cform.addEventListener('submit', async e => {
   formSay('sending');
   try{
     const payload = Object.fromEntries(new FormData(cform).entries());
+    payload.lang = document.documentElement.lang === 'es' ? 'es' : 'en';
     const slot = slotSummary();
     if(slot) payload.message = slot + '\n\n' + (payload.message || '');
+    if(selSlot !== null && selYmd){
+      const [sy, sm, sd] = selYmd.split('-').map(Number);
+      const sh = daySlots(new Date(sy, sm - 1, sd))[selSlot];
+      payload._slot = selYmd + ' ' + slotLabel(sh) + ' (Mexico City)';
+    }
     const r = await fetch(FORM_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},

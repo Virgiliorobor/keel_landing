@@ -35,7 +35,8 @@ from email.message import EmailMessage
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 MAX_BODY = 16 * 1024
-CAPS = {"name": 200, "email": 320, "company": 200, "message": 4000, "_subject": 200}
+CAPS = {"name": 200, "email": 320, "company": 200, "message": 4000,
+        "_subject": 200, "_slot": 200, "lang": 8}
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 RATE_LIMIT = int(os.environ.get("RATE_LIMIT", "5"))
@@ -58,11 +59,13 @@ def _allow(ip: str) -> bool:
         return count <= RATE_LIMIT
 
 
-def _send(to_addr: str, subject: str, body: str) -> None:
+def _send(to_addr: str, subject: str, body: str, reply_to: str = "") -> None:
     msg = EmailMessage()
     msg["From"] = os.environ.get("SMTP_FROM", "Trade Focus <no-reply@trade-focus.com>")
     msg["To"] = to_addr
     msg["Subject"] = subject
+    if reply_to:
+        msg["Reply-To"] = reply_to
     msg.set_content(body)
     host = os.environ.get("SMTP_HOST", "localhost")
     port = int(os.environ.get("SMTP_PORT", "1025"))
@@ -73,6 +76,60 @@ def _send(to_addr: str, subject: str, body: str) -> None:
         if user:
             s.login(user, os.environ.get("SMTP_PASSWORD", ""))
         s.send_message(msg)
+
+
+def _line(value: str, cap: int) -> str:
+    """Collapse to one line and cap length — visitor text never shapes the mail."""
+    return " ".join(str(value).split())[:cap]
+
+
+ACK = {
+    "en": {
+        "subject_slot": "KEEL walkthrough — request received",
+        "subject": "Trade Focus — we received your message",
+        "body_slot": ("Hello {name},\n\n"
+                      "We received your walkthrough request for:\n\n"
+                      "    {slot}\n\n"
+                      "You'll receive the calendar invite once we confirm, "
+                      "usually within one business day.\n\n"
+                      "Trade Focus — tools for customs specialists\n"
+                      "https://trade-focus.com\n"),
+        "body": ("Hello {name},\n\n"
+                 "We received your message and will get back to you soon.\n\n"
+                 "Trade Focus — tools for customs specialists\n"
+                 "https://trade-focus.com\n"),
+    },
+    "es": {
+        "subject_slot": "Demostración KEEL — solicitud recibida",
+        "subject": "Trade Focus — recibimos tu mensaje",
+        "body_slot": ("Hola {name},\n\n"
+                      "Recibimos tu solicitud de demostración para:\n\n"
+                      "    {slot}\n\n"
+                      "Recibirás la invitación de calendario en cuanto confirmemos, "
+                      "normalmente dentro de un día hábil.\n\n"
+                      "Trade Focus — herramientas para especialistas de aduanas\n"
+                      "https://trade-focus.com\n"),
+        "body": ("Hola {name},\n\n"
+                 "Recibimos tu mensaje y te contactamos pronto.\n\n"
+                 "Trade Focus — herramientas para especialistas de aduanas\n"
+                 "https://trade-focus.com\n"),
+    },
+}
+
+
+def _send_ack(fields: dict, contact_addr: str) -> None:
+    """Acknowledgment to the visitor. Fixed template; echoes only the
+    sanitized name and slot. The confirmed .ics invite is sent personally
+    by the operator — this mail only sets that expectation."""
+    lang = "es" if fields.get("lang", "").lower().startswith("es") else "en"
+    t = ACK[lang]
+    name = _line(fields["name"], 80) or ("Hola" if lang == "es" else "Hello")
+    slot = _line(fields.get("_slot", ""), 120)
+    if slot:
+        subject, body = t["subject_slot"], t["body_slot"].format(name=name, slot=slot)
+    else:
+        subject, body = t["subject"], t["body"].format(name=name)
+    _send(fields["email"], subject, body, reply_to=contact_addr)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -155,7 +212,9 @@ class Handler(BaseHTTPRequestHandler):
             self._reply(429, {"error": "rate_limited"})
             return
 
-        body = (f"Name:    {fields['name']}\n"
+        slot = _line(fields.get("_slot", ""), 120)
+        body = ((f"Slot:    {slot}\n" if slot else "")
+                + f"Name:    {fields['name']}\n"
                 f"Email:   {fields['email']}\n"
                 f"Company: {fields['company'] or '-'}\n\n"
                 f"{fields['message'] or '(no message)'}\n")
@@ -165,6 +224,12 @@ class Handler(BaseHTTPRequestHandler):
             print(f"send failed: {type(exc).__name__}", flush=True)
             self._reply(502, {"error": "send_failed"})
             return
+        # acknowledgment to the visitor — best-effort, never blocks the lead
+        if os.environ.get("ACK_ENABLED", "1").lower() not in ("0", "false", "no"):
+            try:
+                _send_ack(fields, to_addr)
+            except Exception as exc:  # noqa: BLE001
+                print(f"ack failed: {type(exc).__name__}", flush=True)
         self._reply(200, {"ok": True})
 
     def log_message(self, fmt, *args):  # quieter default log, no query PII

@@ -17,7 +17,7 @@ The concept archives (`/concepts`, `/v1`, `/v2`) are **not** deployed; they exis
 
 ## Option A — Coolify (recommended)
 
-1. **+ New → Docker Compose**, pick this repo/branch (`docker-docker-compose.yaml` at the root).
+1. **+ New → Docker Compose**, pick this repo/branch (`docker-compose.yaml` at the root).
 2. Attach the domain `https://trade-focus.com` to the **web** service (add `www` if wanted). Coolify's proxy issues TLS automatically.
 3. Set the environment for the **contact** service:
 
@@ -53,6 +53,7 @@ trade-focus.com {
 - `POST /contact` (or `/api/contact`) with JSON `{name, email, company?, message?, _subject?, _honey?}`.
 - Honeypot `_honey` filled → fake success, nothing sent. Field caps (name/company 200, message 4000), 16 KB body cap, per-IP rate limit (5/hour, in-memory).
 - Sends plain text to `CONTACT_EMAIL` via SMTP; `GET /health` for monitoring.
+- **Visitor acknowledgment**: after the lead is delivered, the visitor gets a short bilingual confirmation (their form language) with `Reply-To: CONTACT_EMAIL` — for walkthrough requests it echoes the requested slot and says the calendar invite follows once confirmed. Fixed template; only the sanitized name and slot are echoed, never the message. Best-effort (an ack failure never loses the lead). Disable with `ACK_ENABLED=0`. The confirmed `.ics` invite is sent personally (e.g. from Thunderbird: New Event → add the prospect as attendee).
 - `ALLOWED_ORIGINS` env exists for running it on a separate host, but the default same-origin proxy setup needs no CORS at all.
 
 ## Booking
