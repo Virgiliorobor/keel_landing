@@ -17,7 +17,7 @@ The concept archives (`/concepts`, `/v1`, `/v2`) are **not** deployed; they exis
 
 ## Option A — Coolify (recommended)
 
-1. **+ New → Docker Compose**, pick this repo/branch (`compose.yaml` at the root).
+1. **+ New → Docker Compose**, pick this repo/branch (`docker-docker-compose.yaml` at the root).
 2. Attach the domain `https://trade-focus.com` to the **web** service (add `www` if wanted). Coolify's proxy issues TLS automatically.
 3. Set the environment for the **contact** service:
 
